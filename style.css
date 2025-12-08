@@ -1,0 +1,384 @@
+/* 全域設定：柔和童話感配色 */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Noto Sans TC", -apple-system, BlinkMacSystemFont, system-ui,
+    sans-serif;
+  background: linear-gradient(180deg, #fff3da, #ffe7ff);
+  color: #4b3044;
+}
+
+/* 主容器 */
+.app {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100vh;
+  padding: 16px 16px 32px;
+}
+
+/* 標題區 */
+.app-header {
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.app-header h1 {
+  font-size: 24px;
+  margin: 4px 0;
+  color: #91436b;
+  text-shadow: 0 2px 0 rgba(255, 255, 255, 0.8);
+}
+
+.app-header p {
+  font-size: 14px;
+  margin: 0;
+  color: #7a4a5b;
+}
+
+/* 卡片共用樣式 */
+section {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 18px;
+  border: 2px solid #f2c8a2;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+  padding: 12px 14px 14px;
+  margin-top: 12px;
+}
+
+/* 🐻 熊熊面板 */
+.bear-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 熊熊視覺區：童話感圓形框＋晃動動畫 */
+.bear-visual {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  margin-top: 4px;
+  background: radial-gradient(circle at 30% 20%, #ffe7ad, #ffc3d4);
+  border: 3px solid #f2c8a2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  animation: bearFloat 3s ease-in-out infinite;
+}
+
+@keyframes bearFloat {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* 用 CSS 畫一個簡單熊臉（手繪感） */
+.bear-face {
+  width: 80px;
+  height: 70px;
+  background: #8b5c3b;
+  border-radius: 48px;
+  position: relative;
+}
+
+/* 耳朵 */
+.bear-ear {
+  width: 26px;
+  height: 26px;
+  background: #8b5c3b;
+  border-radius: 50%;
+  position: absolute;
+  top: -12px;
+}
+
+.bear-ear-left {
+  left: 4px;
+}
+
+.bear-ear-right {
+  right: 4px;
+}
+
+/* 眼睛 */
+.bear-eye {
+  width: 8px;
+  height: 8px;
+  background: #fff;
+  border-radius: 50%;
+  position: absolute;
+  top: 24px;
+}
+
+.bear-eye-left {
+  left: 20px;
+}
+
+.bear-eye-right {
+  right: 20px;
+}
+
+.bear-eye::after {
+  content: "";
+  width: 4px;
+  height: 4px;
+  background: #2d1a16;
+  border-radius: 50%;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+}
+
+/* 鼻子＋嘴巴 */
+.bear-nose {
+  width: 18px;
+  height: 14px;
+  background: #2d1a16;
+  border-radius: 10px;
+  position: absolute;
+  top: 34px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.bear-mouth {
+  width: 26px;
+  height: 16px;
+  border-bottom: 3px solid #2d1a16;
+  border-radius: 0 0 16px 16px;
+  position: absolute;
+  top: 42px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* 不同模式時，外圈顏色變化（閱讀／運動／技能） */
+.bear-visual.mode-reading {
+  background: radial-gradient(circle at 30% 20%, #fff1b8, #ffd58b);
+}
+
+.bear-visual.mode-sport {
+  background: radial-gradient(circle at 30% 20%, #d8ffe0, #9ee7c4);
+}
+
+.bear-visual.mode-skill {
+  background: radial-gradient(circle at 30% 20%, #e3ddff, #c4b5ff);
+}
+
+/* 熊熊對話泡泡 */
+.bear-bubble {
+  margin-top: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+  background: #fffaf0;
+  border-radius: 16px;
+  border: 1px dashed #f0b882;
+  padding: 8px 10px;
+  position: relative;
+}
+
+.bear-bubble::before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  left: 22px;
+  border-width: 0 8px 8px 8px;
+  border-style: solid;
+  border-color: transparent transparent #fffaf0 transparent;
+}
+
+/* 📊 成長狀態 */
+.stats h2,
+.timer h2 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  color: #85415b;
+}
+
+.level-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+#levelText {
+  font-weight: 700;
+  color: #ff7f50;
+}
+
+.stat-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: 13px;
+}
+
+.stat-bar {
+  flex: 1;
+  height: 8px;
+  border-radius: 999px;
+  background: #f5e1d1;
+  overflow: hidden;
+}
+
+.stat-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #ffb769, #ff7bb8);
+  transition: width 0.3s ease;
+}
+
+.stat-value {
+  min-width: 60px;
+  text-align: right;
+  font-size: 12px;
+  color: #7a4a5b;
+}
+
+/* ⏳ 任務與定時器 */
+.timer h3 {
+  margin: 10px 0 4px;
+  font-size: 14px;
+  color: #7a4a5b;
+}
+
+/* 活動按鈕 */
+.activity-buttons,
+.duration-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.activity-btn,
+.duration-btn {
+  flex: 1;
+  min-width: 90px;
+  border-radius: 999px;
+  border: 1px solid #f1c3a7;
+  padding: 6px 8px;
+  font-size: 13px;
+  background: #fff7e6;
+  color: #7a4a5b;
+  cursor: pointer;
+  box-shadow: 0 2px 0 rgba(255, 255, 255, 0.8);
+  transition: all 0.15s ease;
+}
+
+.activity-btn:hover,
+.duration-btn:hover {
+  transform: translateY(-1px);
+}
+
+.activity-btn.active,
+.duration-btn.active {
+  background: linear-gradient(90deg, #ffce9f, #ff9fc8);
+  color: #4b3044;
+  border-color: #f0937f;
+}
+
+/* 定時器狀態顯示 */
+.timer-display {
+  margin-top: 10px;
+  font-size: 14px;
+  text-align: center;
+  color: #7a4a5b;
+}
+
+/* 進度條 */
+.timer-progress {
+  margin-top: 6px;
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: #f5e1d1;
+  overflow: hidden;
+}
+
+.timer-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #ffe38f, #ff97b0);
+  transition: width 0.2s linear;
+}
+
+/* 按鈕 */
+.timer-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.primary-btn,
+.ghost-btn,
+.link-btn {
+  flex: 1;
+  border-radius: 999px;
+  padding: 8px 10px;
+  font-size: 14px;
+  cursor: pointer;
+  border: none;
+}
+
+.primary-btn {
+  background: linear-gradient(90deg, #ffce9f, #ff9fc8);
+  color: #4b3044;
+  box-shadow: 0 3px 8px rgba(255, 164, 118, 0.6);
+}
+
+.primary-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+  box-shadow: none;
+}
+
+.ghost-btn {
+  background: #fffaf0;
+  color: #7a4a5b;
+  border: 1px solid #f1c3a7;
+}
+
+.ghost-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* footer */
+.app-footer {
+  margin-top: 14px;
+  text-align: center;
+}
+
+.link-btn {
+  width: 100%;
+  background: transparent;
+  color: #91436b;
+  border-radius: 999px;
+  border: 1px dashed #f1c3a7;
+}
+
+/* 小螢幕優化 */
+@media (max-width: 360px) {
+  .app {
+    padding: 10px 10px 24px;
+  }
+
+  .bear-visual {
+    width: 140px;
+    height: 140px;
+  }
+}
