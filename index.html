@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <title>成長熊 · 陪你一起長大</title>
+  <title>成長熊 · 電子養成夥伴</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -13,18 +13,10 @@
       <p>選一件事，讓熊熊陪你一起專心完成。</p>
     </header>
 
-    <!-- 🐻 熊熊區塊 -->
+    <!-- 🐻 熊熊區塊（圖片版） -->
     <section class="bear-panel">
       <div class="bear-visual mode-idle" id="bearVisual">
-        <!-- 這裡是用 CSS 畫出簡單熊臉，之後你也可以改成背景圖 -->
-        <div class="bear-face">
-          <div class="bear-ear bear-ear-left"></div>
-          <div class="bear-ear bear-ear-right"></div>
-          <div class="bear-eye bear-eye-left"></div>
-          <div class="bear-eye bear-eye-right"></div>
-          <div class="bear-nose"></div>
-          <div class="bear-mouth"></div>
-        </div>
+        <img id="bearImage" src="images/bear_idle.png" alt="成長熊" />
       </div>
       <div class="bear-bubble" id="bearBubble">
         🐻 嗨，我是成長熊。今天想一起做什麼呢？
@@ -64,24 +56,38 @@
       </div>
     </section>
 
-    <!-- ⏳ 任務與定時器 -->
+    <!-- ⏳ 任務／定時／小日記／鬧鐘 -->
     <section class="timer">
       <h2>今天要做什麼？</h2>
 
+      <!-- 活動種類 -->
       <div class="activity-buttons">
         <button class="activity-btn active" data-activity="reading">📖 看書</button>
         <button class="activity-btn" data-activity="sport">💪 運動</button>
         <button class="activity-btn" data-activity="skill">🎵 練技能</button>
       </div>
 
-      <h3>專注多久？</h3>
-      <div class="duration-buttons">
-        <button class="duration-btn" data-minutes="10">10 分鐘</button>
-        <button class="duration-btn" data-minutes="20">20 分鐘</button>
-        <button class="duration-btn" data-minutes="30">30 分鐘</button>
-        <button class="duration-btn" data-minutes="60">60 分鐘</button>
+      <!-- 可累加的時間設定 -->
+      <h3>設定本次專注時間（可以累加調整）</h3>
+
+      <div class="step-select-row">
+        <span class="step-label">每次調整：</span>
+        <div class="step-buttons">
+          <button class="step-btn active" data-step="1">1 分</button>
+          <button class="step-btn" data-step="5">5 分</button>
+          <button class="step-btn" data-step="10">10 分</button>
+          <button class="step-btn" data-step="30">30 分</button>
+          <button class="step-btn" data-step="60">60 分</button>
+        </div>
       </div>
 
+      <div class="duration-control">
+        <button id="minusBtn" class="round-btn">－</button>
+        <div id="durationMinutes" class="duration-display">0 分鐘</div>
+        <button id="plusBtn" class="round-btn">＋</button>
+      </div>
+
+      <!-- 定時器顯示 -->
       <div class="timer-display" id="timerDisplay">
         尚未開始
       </div>
@@ -94,13 +100,58 @@
         <button class="primary-btn" id="startButton">開始陪伴</button>
         <button class="ghost-btn" id="cancelButton" disabled>結束 / 取消</button>
       </div>
+
+      <div class="diary-actions">
+        <button class="ghost-btn" id="diaryButton">📔 小日記</button>
+      </div>
+
+      <div id="diaryPanel" class="diary-panel" style="display:none;">
+        <h3>成長熊的小日記</h3>
+        <div id="diaryList" class="diary-list">
+          目前還沒有紀錄，完成一次活動就會出現囉～
+        </div>
+      </div>
+
+      <hr class="soft-hr" />
+
+      <!-- 🔔 鬧鐘排程區 -->
+      <div class="alarm-block">
+        <h3>鬧鐘提醒 — 安排什麼時候要做什麼</h3>
+
+        <div class="alarm-form">
+          <div class="alarm-row">
+            <label for="alarmActivity">活動：</label>
+            <select id="alarmActivity">
+              <option value="reading">📖 看書</option>
+              <option value="sport">💪 運動</option>
+              <option value="skill">🎵 練技能</option>
+            </select>
+          </div>
+
+          <div class="alarm-row">
+            <label for="alarmTime">時間：</label>
+            <input id="alarmTime" type="time" />
+          </div>
+
+          <div class="alarm-row">
+            <label for="alarmLabel">備註：</label>
+            <input id="alarmLabel" type="text" placeholder="例如：睡前閱讀 / 晚上運動" />
+          </div>
+
+          <button id="addAlarmBtn" class="primary-btn small-btn">新增鬧鐘</button>
+          <p class="alarm-tip">＊提示：網頁必須開著，鬧鐘才會提醒喔。</p>
+        </div>
+
+        <div class="alarm-list" id="alarmList">
+          目前還沒有鬧鐘，試著安排一個吧！
+        </div>
+      </div>
     </section>
 
     <footer class="app-footer">
       <button class="link-btn" onclick="window.location.href='index.html';">
         ⬅ 返回冒險者天堂首頁
       </button>
-      <!-- 若這個遊戲是在子資料夾，之後你可以改成 './' 或 '../index.html' -->
     </footer>
   </div>
 
