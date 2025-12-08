@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <title>成長熊 · 陪你一起長大</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="app-header">
+      <h1>成長熊 · 電子養成夥伴</h1>
+      <p>選一件事，讓熊熊陪你一起專心完成。</p>
+    </header>
+
+    <!-- 🐻 熊熊區塊 -->
+    <section class="bear-panel">
+      <div class="bear-visual mode-idle" id="bearVisual">
+        <!-- 這裡是用 CSS 畫出簡單熊臉，之後你也可以改成背景圖 -->
+        <div class="bear-face">
+          <div class="bear-ear bear-ear-left"></div>
+          <div class="bear-ear bear-ear-right"></div>
+          <div class="bear-eye bear-eye-left"></div>
+          <div class="bear-eye bear-eye-right"></div>
+          <div class="bear-nose"></div>
+          <div class="bear-mouth"></div>
+        </div>
+      </div>
+      <div class="bear-bubble" id="bearBubble">
+        🐻 嗨，我是成長熊。今天想一起做什麼呢？
+      </div>
+    </section>
+
+    <!-- 📊 成長狀態 -->
+    <section class="stats">
+      <h2>成長狀態</h2>
+      <div class="level-row">
+        <span>等級</span>
+        <span id="levelText">Lv. 1</span>
+      </div>
+
+      <div class="stat-row">
+        <span>閱讀 📖</span>
+        <div class="stat-bar">
+          <div id="readingBar" class="stat-fill"></div>
+        </div>
+        <span id="readingValue" class="stat-value">0 分鐘</span>
+      </div>
+
+      <div class="stat-row">
+        <span>運動 💪</span>
+        <div class="stat-bar">
+          <div id="sportBar" class="stat-fill"></div>
+        </div>
+        <span id="sportValue" class="stat-value">0 分鐘</span>
+      </div>
+
+      <div class="stat-row">
+        <span>技能 🎵</span>
+        <div class="stat-bar">
+          <div id="skillBar" class="stat-fill"></div>
+        </div>
+        <span id="skillValue" class="stat-value">0 分鐘</span>
+      </div>
+    </section>
+
+    <!-- ⏳ 任務與定時器 -->
+    <section class="timer">
+      <h2>今天要做什麼？</h2>
+
+      <div class="activity-buttons">
+        <button class="activity-btn active" data-activity="reading">📖 看書</button>
+        <button class="activity-btn" data-activity="sport">💪 運動</button>
+        <button class="activity-btn" data-activity="skill">🎵 練技能</button>
+      </div>
+
+      <h3>專注多久？</h3>
+      <div class="duration-buttons">
+        <button class="duration-btn" data-minutes="10">10 分鐘</button>
+        <button class="duration-btn" data-minutes="20">20 分鐘</button>
+        <button class="duration-btn" data-minutes="30">30 分鐘</button>
+        <button class="duration-btn" data-minutes="60">60 分鐘</button>
+      </div>
+
+      <div class="timer-display" id="timerDisplay">
+        尚未開始
+      </div>
+
+      <div class="timer-progress">
+        <div class="timer-progress-fill" id="timerProgressFill"></div>
+      </div>
+
+      <div class="timer-actions">
+        <button class="primary-btn" id="startButton">開始陪伴</button>
+        <button class="ghost-btn" id="cancelButton" disabled>結束 / 取消</button>
+      </div>
+    </section>
+
+    <footer class="app-footer">
+      <button class="link-btn" onclick="window.location.href='index.html';">
+        ⬅ 返回冒險者天堂首頁
+      </button>
+      <!-- 若這個遊戲是在子資料夾，之後你可以改成 './' 或 '../index.html' -->
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
