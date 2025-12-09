@@ -2,9 +2,13 @@
   box-sizing: border-box;
 }
 
+/* 整個畫面固定在一個螢幕高度，禁止捲動 */
+html,
 body {
   margin: 0;
   padding: 0;
+  height: 100vh;
+  overflow: hidden;
   font-family: "Noto Sans TC", -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
   background: linear-gradient(to bottom, #ffe5f1, #ffe9c9);
@@ -12,57 +16,98 @@ body {
 }
 
 .app {
+  height: 100vh;
   max-width: 480px;
   margin: 0 auto;
-  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 12px 10px;
 }
 
 /* --------- Header --------- */
 .app-header {
   text-align: center;
-  margin-bottom: 12px;
+  margin-bottom: 6px;
+  flex: 0 0 auto;
 }
 
 .app-header h1 {
-  margin: 0 0 4px;
-  font-size: 20px;
+  margin: 0 0 2px;
+  font-size: 18px;
   color: #9a4b5c;
 }
 
 .app-header p {
   margin: 0;
-  font-size: 13px;
+  font-size: 12px;
   color: #b17376;
 }
 
-/* --------- Bear Panel --------- */
+/* --------- Main Layout --------- */
+.main-layout {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 0;
+}
+
+/* 熊熊 / 狀態 / 計時三塊都在一個螢幕內，靠 flex 壓縮 */
 .bear-panel {
   position: relative;
   background: #ffece0;
-  border-radius: 20px;
+  border-radius: 16px;
   border: 2px solid #f3c9b0;
-  padding: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  margin-bottom: 12px;
+  padding: 8px 10px 10px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+  flex: 0 0 36%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 0;
 }
 
+.stats {
+  background: #fff7f3;
+  border-radius: 16px;
+  border: 2px solid #f3d0bf;
+  padding: 8px 10px;
+  margin: 0;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+  flex: 0 0 22%;
+  min-height: 0;
+}
+
+.timer {
+  background: #fff7fb;
+  border-radius: 16px;
+  border: 2px solid #f2cbe5;
+  padding: 8px 10px 10px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* --------- Bear Panel --------- */
 .home-btn {
   position: absolute;
-  right: 12px;
-  top: 12px;
+  right: 8px;
+  top: 8px;
   border-radius: 999px;
   border: 1px solid #e2b0b0;
   background: #ffe7f0;
-  padding: 4px 10px;
-  font-size: 12px;
+  padding: 3px 8px;
+  font-size: 11px;
   color: #9a4b5c;
   cursor: pointer;
 }
 
 .bear-visual {
-  width: 180px;
-  height: 180px;
-  margin: 4px auto 8px;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 4px;
   border-radius: 50%;
   background: #ffe0ce;
   border: 3px solid #f3b9a0;
@@ -72,18 +117,19 @@ body {
 }
 
 .bear-visual img {
-  max-width: 85%;
-  max-height: 85%;
+  max-width: 82%;
+  max-height: 82%;
   object-fit: contain;
 }
 
 .bear-bubble {
-  margin: 4px auto 8px;
+  max-width: 100%;
+  margin: 4px auto 4px;
   background: #fff9f1;
   border-radius: 999px;
-  padding: 6px 12px;
+  padding: 4px 8px;
   border: 1px dashed #f0c3a3;
-  font-size: 13px;
+  font-size: 12px;
   text-align: center;
 }
 
@@ -91,10 +137,10 @@ body {
 .bear-name-row {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   justify-content: center;
-  font-size: 13px;
-  margin-bottom: 8px;
+  font-size: 12px;
+  margin-bottom: 4px;
 }
 
 .bear-name-label {
@@ -110,24 +156,25 @@ body {
   border-radius: 999px;
   border: 1px solid #e2b0b0;
   background: #ffe1eb;
-  padding: 3px 10px;
-  font-size: 12px;
+  padding: 2px 8px;
+  font-size: 11px;
   cursor: pointer;
 }
 
 /* 星星商店列 */
 .star-shop-bar {
-  margin-top: 4px;
-  padding: 6px 10px;
+  margin-top: 2px;
+  padding: 4px 8px;
   border-radius: 999px;
   background: #fff6de;
   border: 1px solid #f2d09c;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 13px;
+  font-size: 12px;
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.06);
+  width: 100%;
 }
 
 .star-shop-left {
@@ -152,7 +199,7 @@ body {
 }
 
 .star-count-label {
-  font-size: 12px;
+  font-size: 11px;
   color: #b17c40;
 }
 
@@ -162,41 +209,32 @@ body {
 }
 
 /* --------- Stats --------- */
-.stats {
-  background: #fff7f3;
-  border-radius: 20px;
-  border: 2px solid #f3d0bf;
-  padding: 14px;
-  margin-bottom: 12px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-}
-
 .stats-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .stats-header h2 {
   margin: 0;
-  font-size: 16px;
+  font-size: 14px;
 }
 
 .stats-diary-btn {
   border-radius: 999px;
   border: 1px solid #dca6a0;
   background: #ffe4ea;
-  padding: 4px 10px;
-  font-size: 12px;
+  padding: 3px 8px;
+  font-size: 11px;
   cursor: pointer;
 }
 
 .level-row {
   display: flex;
   justify-content: space-between;
-  margin: 4px 0 8px;
-  font-size: 13px;
+  margin: 2px 0 4px;
+  font-size: 12px;
 }
 
 .level-row span:last-child {
@@ -208,13 +246,13 @@ body {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 13px;
-  margin: 4px 0;
+  font-size: 12px;
+  margin: 2px 0;
 }
 
 .stat-bar {
   flex: 1;
-  height: 8px;
+  height: 6px;
   border-radius: 999px;
   background: #ffe0dd;
   overflow: hidden;
@@ -228,21 +266,12 @@ body {
 }
 
 .stat-value {
-  width: 70px;
+  width: 64px;
   text-align: right;
-  font-size: 12px;
+  font-size: 11px;
 }
 
 /* --------- Timer --------- */
-.timer {
-  background: #fff7fb;
-  border-radius: 20px;
-  border: 2px solid #f2cbe5;
-  padding: 14px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-  margin-bottom: 20px;
-}
-
 .timer-header-row {
   display: flex;
   justify-content: space-between;
@@ -251,12 +280,12 @@ body {
 
 .timer-header-row h2 {
   margin: 0;
-  font-size: 16px;
+  font-size: 14px;
 }
 
 .timer-header-actions {
   display: flex;
-  gap: 6px;
+  gap: 4px;
 }
 
 .timer-alarm-btn,
@@ -264,25 +293,26 @@ body {
   border-radius: 999px;
   border: 1px solid #d0a0d8;
   background: #f7e3ff;
-  padding: 4px 8px;
-  font-size: 12px;
+  padding: 3px 6px;
+  font-size: 11px;
   cursor: pointer;
 }
 
 /* 活動選項 */
 .activity-buttons {
   display: flex;
-  gap: 8px;
-  margin: 10px 0 8px;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 6px 0 4px;
 }
 
 .activity-btn {
-  flex: 1;
+  flex: 1 1 calc(50% - 4px);
   border-radius: 999px;
   border: 1px solid #e2b0b0;
   background: #ffe3ea;
-  padding: 6px 4px;
-  font-size: 13px;
+  padding: 4px 4px;
+  font-size: 12px;
   cursor: pointer;
 }
 
@@ -294,16 +324,16 @@ body {
 
 /* 時間設定 */
 .timer h3 {
-  margin: 8px 0 6px;
-  font-size: 14px;
+  margin: 4px 0 4px;
+  font-size: 13px;
 }
 
 .step-select-row {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  margin-bottom: 6px;
+  gap: 4px;
+  font-size: 12px;
+  margin-bottom: 4px;
 }
 
 .step-label {
@@ -320,8 +350,8 @@ body {
   border-radius: 999px;
   border: 1px solid #e2b0b0;
   background: #ffe8ed;
-  padding: 4px 10px;
-  font-size: 12px;
+  padding: 3px 8px;
+  font-size: 11px;
   cursor: pointer;
 }
 
@@ -335,26 +365,26 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  margin-bottom: 8px;
+  gap: 10px;
+  margin-bottom: 4px;
 }
 
 .round-btn {
-  width: 34px;
-  height: 34px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   border: none;
   background: linear-gradient(to bottom, #ffb7c7, #ff8b9e);
   color: #fff;
-  font-size: 18px;
+  font-size: 16px;
   cursor: pointer;
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
 }
 
 .duration-display {
-  min-width: 90px;
+  min-width: 80px;
   text-align: center;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: bold;
   color: #9a4b5c;
 }
@@ -362,18 +392,18 @@ body {
 /* 計時顯示 */
 .timer-display {
   text-align: center;
-  font-size: 14px;
-  margin: 8px 0 4px;
+  font-size: 13px;
+  margin: 4px 0 2px;
   color: #91506b;
 }
 
 .timer-progress {
   width: 100%;
-  height: 10px;
+  height: 6px;
   border-radius: 999px;
   background: #ffe2f2;
   overflow: hidden;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 
 .timer-progress-fill {
@@ -386,7 +416,8 @@ body {
 /* 按鈕 */
 .timer-actions {
   display: flex;
-  gap: 8px;
+  gap: 6px;
+  margin-top: auto;
 }
 
 .primary-btn,
@@ -400,8 +431,8 @@ body {
   flex: 1;
   border-radius: 999px;
   border: none;
-  padding: 8px 12px;
-  font-size: 14px;
+  padding: 6px 8px;
+  font-size: 13px;
   background: linear-gradient(to right, #ffa5c0, #ffb57a);
   color: #fff;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
@@ -411,8 +442,8 @@ body {
   flex: 1;
   border-radius: 999px;
   border: 1px solid #e3b4c9;
-  padding: 8px 12px;
-  font-size: 14px;
+  padding: 6px 8px;
+  font-size: 13px;
   background: #fff4fb;
   color: #94526c;
 }
@@ -455,10 +486,12 @@ body {
   position: relative;
   background: #fff8f7;
   border-radius: 18px;
-  padding: 16px;
+  padding: 14px;
   border: 2px solid #f3c7c0;
   width: 88%;
   max-width: 380px;
+  max-height: 80vh;
+  overflow-y: auto;
   z-index: 1;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
@@ -486,8 +519,8 @@ body {
 }
 
 .completion-bear {
-  font-size: 40px;
-  margin-bottom: 8px;
+  font-size: 36px;
+  margin-bottom: 6px;
 }
 
 .completion-stars-text {
@@ -497,7 +530,7 @@ body {
 
 /* 日記列表 */
 .diary-list {
-  margin-top: 10px;
+  margin-top: 8px;
   max-height: 320px;
   overflow-y: auto;
   font-size: 13px;
@@ -602,7 +635,7 @@ body {
   background: #fff7e6;
   border-radius: 16px;
   border: 2px solid #f5d3a6;
-  padding: 10px 14px;
+  padding: 8px 12px;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
   font-size: 13px;
   display: none;
@@ -615,7 +648,7 @@ body {
   left: 50%;
   top: 60%;
   transform: translateX(-50%);
-  font-size: 26px;
+  font-size: 24px;
   font-weight: bold;
   color: #ffbf37;
   opacity: 1;
@@ -624,7 +657,7 @@ body {
 }
 
 .fly-star.fly {
-  top: 7%;
+  top: 9%;
   left: 16%;
   opacity: 0;
 }
@@ -645,9 +678,11 @@ body {
   max-width: 380px;
   background: #fff7ee;
   border-radius: 20px;
-  padding: 16px;
+  padding: 14px;
   border: 2px solid #f3c79d;
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+  max-height: 82vh;
+  overflow-y: auto;
 }
 
 .shop-close-btn {
