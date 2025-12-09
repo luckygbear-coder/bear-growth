@@ -52,7 +52,7 @@ body {
   min-height: 0;
 }
 
-/* 熊熊 / 狀態 / 計時三塊都在一個螢幕內，靠 flex 壓縮 */
+/* 熊熊 / 成長圓圈 / 計時 三塊靠 flex 壓縮 */
 .bear-panel {
   position: relative;
   background: #ffece0;
@@ -67,14 +67,14 @@ body {
   min-height: 0;
 }
 
-.stats {
+.growth-activities {
   background: #fff7f3;
   border-radius: 16px;
   border: 2px solid #f3d0bf;
-  padding: 8px 10px;
+  padding: 6px 10px 8px;
   margin: 0;
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
-  flex: 0 0 25%;
+  flex: 0 0 26%;
   min-height: 0;
 }
 
@@ -208,24 +208,24 @@ body {
   color: #e48d23;
 }
 
-/* --------- Stats --------- */
+/* --------- Growth / Circles --------- */
 .stats-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .stats-header h2 {
   margin: 0;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .stats-diary-btn {
   border-radius: 999px;
   border: 1px solid #dca6a0;
   background: #ffe4ea;
-  padding: 3px 8px;
+  padding: 2px 7px;
   font-size: 11px;
   cursor: pointer;
 }
@@ -233,7 +233,7 @@ body {
 .level-row {
   display: flex;
   justify-content: space-between;
-  margin: 2px 0 4px;
+  margin: 0 0 2px;
   font-size: 12px;
 }
 
@@ -242,32 +242,70 @@ body {
   font-weight: bold;
 }
 
-.stat-row {
+.level-small-row {
+  font-size: 11px;
+  color: #a37267;
+  margin-bottom: 4px;
+}
+
+/* 四個圓圈 */
+.activity-circle-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.activity-circle {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 11px;
+}
+
+.activity-circle-outer {
+  --progress: 0deg;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  padding: 3px;
+  background:
+    conic-gradient(#ff9fb7 var(--progress), #ffe5ee var(--progress) 360deg);
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  margin: 2px 0;
+  justify-content: center;
+  cursor: pointer;
 }
 
-.stat-bar {
-  flex: 1;
-  height: 5px;
-  border-radius: 999px;
-  background: #ffe0dd;
-  overflow: hidden;
-}
-
-.stat-fill {
-  width: 0%;
+.activity-circle-inner {
+  width: 100%;
   height: 100%;
-  background: linear-gradient(to right, #ffa7b5, #ffce8f);
-  border-radius: 999px;
+  border-radius: 50%;
+  background: #fff7f3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
-.stat-value {
-  width: 64px;
-  text-align: right;
+.activity-icon {
+  font-size: 18px;
+}
+
+.activity-label {
+  font-size: 11px;
+  margin-top: 1px;
+}
+
+/* 被選取中的活動 */
+.activity-circle.active .activity-circle-inner {
+  background: #ffe3ef;
+  box-shadow: 0 0 0 2px rgba(255, 160, 195, 0.8);
+}
+
+.activity-minutes {
+  margin-top: 2px;
   font-size: 11px;
 }
 
@@ -298,36 +336,12 @@ body {
   cursor: pointer;
 }
 
-/* 活動選項 */
-.activity-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  margin: 6px 0 4px;
-}
-
-.activity-btn {
-  flex: 1 1 calc(50% - 4px);
-  border-radius: 999px;
-  border: 1px solid #e2b0b0;
-  background: #ffe3ea;
-  padding: 4px 4px;
-  font-size: 12px;
-  cursor: pointer;
-}
-
-.activity-btn.active {
-  background: linear-gradient(to right, #ffb6c9, #ffc58f);
-  border-color: #f095a7;
-  color: #6a2c3a;
-}
-
-/* 時間設定 */
 .timer h3 {
   margin: 4px 0 4px;
   font-size: 13px;
 }
 
+/* 時間設定 */
 .step-select-row {
   display: flex;
   align-items: center;
