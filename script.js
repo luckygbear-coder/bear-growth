@@ -1,5 +1,5 @@
-// 成長熊 終極版
-// 可累加時間＋10 分鐘小語＋小日記＋鬧鐘＋三種活動圖片＋三種閒置熊隨機
+// 成長熊 手機終極版
+// 可累加時間＋10 分鐘小語＋今日日記＋全部日記 Modal＋鬧鐘＋三種活動圖片＋三種閒置熊隨機
 
 (function () {
   // ========== 狀態 ==========
@@ -40,6 +40,9 @@
     "images/bear_idle2.png",
     "images/bear_idle3.png",
   ];
+
+  // 最近一次完成紀錄（給完成 Modal 用）
+  var lastSessionInfo = null;
 
   // ========== localStorage ==========
   function loadState() {
@@ -118,9 +121,9 @@
       "🐻 今天的你又比昨天多學了一點點，好厲害。",
     ],
     finished: [
-      "🐻 你做到了！好想幫你鼓掌！",
-      "🐻 任務完成～今天的你又升級了。",
-      "🐻 謝謝你願意照顧自己，也順便照顧了我。",
+      "你做到了！好想幫你鼓掌！",
+      "任務完成～今天的你又升級了。",
+      "謝謝你願意照顧自己，也順便照顧了我。",
     ],
   };
 
@@ -202,14 +205,14 @@
     setBearImage(mode);
 
     if (forceMessage || !bearBubble.textContent) {
-      bearBubble.textContent = randomFrom(msgGroup);
+      var group = msgGroup || messages.idle;
+      // 閒置時優先顯示第一句
+      if (mode === "idle") {
+        bearBubble.textContent = messages.idle[0];
+      } else {
+        bearBubble.textContent = randomFrom(group);
+      }
     }
-  }
-
-  function showFinishedMessage() {
-    var bearBubble = document.getElementById("bearBubble");
-    if (!bearBubble) return;
-    bearBubble.textContent = randomFrom(messages.finished);
   }
 
   // ========== 定時器顯示 ==========
@@ -248,7 +251,13 @@
     el.textContent = currentMinutes + " 分鐘";
   }
 
-  // ========== 小日記 ==========
+  // ========== 日記相關 ==========
+  function sameDate(iso, todayStr) {
+    // iso: "YYYY-MM-DDTHH:MM:SSZ"
+    if (!iso) return false;
+    return iso.slice(0, 10) === todayStr;
+  }
+
   function formatDateTime(iso) {
     var d = new Date(iso);
     if (isNaN(d.getTime())) return iso;
@@ -260,12 +269,49 @@
     return y + "/" + m + "/" + day + " " + hh + ":" + mm;
   }
 
-  function updateDiaryUI() {
-    var list = document.getElementById("diaryList");
+  // 今日日記（只顯示今天）
+  function updateTodayDiaryUI() {
+    var list = document.getElementById("todayDiaryList");
+    if (!list) return;
+
+    var today = new Date().toISOString().slice(0, 10);
+
+    var todays = diary.filter(function (item) {
+      return sameDate(item.startISO, today);
+    });
+
+    if (!todays.length) {
+      list.textContent = "今天還沒有紀錄，完成一次活動就會出現囉～";
+      return;
+    }
+
+    var html = todays
+      .slice()
+      .reverse()
+      .map(function (item) {
+        var label = activityLabels[item.activity] || item.activity;
+        return (
+          '<div class="diary-item">' +
+          '<div class="diary-main">· ' +
+          label +
+          " — " +
+          item.minutes +
+          " 分鐘</div>" +
+          "</div>"
+        );
+      })
+      .join("");
+
+    list.innerHTML = html;
+  }
+
+  // 全部日記（Modal 用）
+  function updateAllDiaryUI() {
+    var list = document.getElementById("allDiaryList");
     if (!list) return;
 
     if (!diary.length) {
-      list.textContent = "目前還沒有紀錄，完成一次活動就會出現囉～";
+      list.textContent = "目前還沒有任何紀錄。";
       return;
     }
 
@@ -296,7 +342,7 @@
     list.innerHTML = html;
   }
 
-  // ========== 完成任務：加成長＋寫日記 ==========
+  // ========== 完成任務：加成長＋寫日記＋顯示 Modal ==========
   function finishSession() {
     if (!currentMinutes || !currentActivity) return;
 
@@ -311,32 +357,22 @@
     var end = new Date();
     var start = sessionStartTime || end;
 
-    diary.push({
+    var record = {
       activity: currentActivity,
       minutes: currentMinutes,
       startISO: start.toISOString(),
       endISO: end.toISOString(),
-    });
+    };
+
+    diary.push(record);
+    lastSessionInfo = record;
 
     saveState();
     saveDiary();
     updateStatsUI();
-    updateDiaryUI();
-    showFinishedMessage();
+    updateTodayDiaryUI();
 
-    var label = activityLabels[currentActivity] || currentActivity;
-    var again = window.confirm(
-      "已完成一輪「" +
-        label +
-        "」：" +
-        currentMinutes +
-        " 分鐘。\n要再繼續下一輪嗎？"
-    );
-    if (again) {
-      startTimerSession();
-    } else {
-      setBearMode("idle", true);
-    }
+    showCompletionModal(record);
   }
 
   // ========== 每 10 分鐘一次鼓勵小語 ==========
@@ -404,6 +440,41 @@
       updateTimerDisplay(totalSeconds, remainingSeconds);
       maybeEncourage(totalSeconds, remainingSeconds);
     }, 1000);
+  }
+
+  // ========== 完成鼓勵 Modal ==========
+  function showCompletionModal(record) {
+    var modal = document.getElementById("completionModal");
+    var titleEl = document.getElementById("completionTitle");
+    var textEl = document.getElementById("completionText");
+    if (!modal || !titleEl || !textEl) return;
+
+    var label = activityLabels[record.activity] || record.activity;
+    var msg = randomFrom(messages.finished);
+
+    titleEl.textContent = "太棒了！";
+    textEl.textContent =
+      "你完成了 " +
+      record.minutes +
+      " 分鐘的「" +
+      label +
+      "」，" +
+      msg;
+
+    modal.classList.remove("hidden");
+    // 小延遲讓動畫生效
+    setTimeout(function () {
+      modal.classList.add("show");
+    }, 10);
+  }
+
+  function hideCompletionModal() {
+    var modal = document.getElementById("completionModal");
+    if (!modal) return;
+    modal.classList.remove("show");
+    setTimeout(function () {
+      modal.classList.add("hidden");
+    }, 200);
   }
 
   // ========== 鬧鐘 ==========
@@ -556,8 +627,15 @@
     var minusBtn = document.getElementById("minusBtn");
     var startButton = document.getElementById("startButton");
     var cancelButton = document.getElementById("cancelButton");
-    var diaryButton = document.getElementById("diaryButton");
-    var diaryPanel = document.getElementById("diaryPanel");
+
+    var openAllDiaryBtn = document.getElementById("openAllDiaryBtn");
+    var allDiaryModal = document.getElementById("allDiaryModal");
+    var closeAllDiaryBtn = document.getElementById("closeAllDiaryBtn");
+
+    var completionModal = document.getElementById("completionModal");
+    var modalAgainBtn = document.getElementById("modalAgainBtn");
+    var modalRestBtn = document.getElementById("modalRestBtn");
+
     var addAlarmBtn = document.getElementById("addAlarmBtn");
     var alarmActivity = document.getElementById("alarmActivity");
     var alarmTime = document.getElementById("alarmTime");
@@ -629,14 +707,59 @@
       });
     }
 
-    // 小日記面板開關
-    if (diaryButton && diaryPanel) {
-      diaryButton.addEventListener("click", function () {
-        if (diaryPanel.style.display === "none" || !diaryPanel.style.display) {
-          diaryPanel.style.display = "block";
-          updateDiaryUI();
-        } else {
-          diaryPanel.style.display = "none";
+    // 打開全部日記 Modal
+    if (openAllDiaryBtn && allDiaryModal) {
+      openAllDiaryBtn.addEventListener("click", function () {
+        updateAllDiaryUI();
+        allDiaryModal.classList.remove("hidden");
+        setTimeout(function () {
+          allDiaryModal.classList.add("show");
+        }, 10);
+      });
+    }
+
+    // 關閉全部日記 Modal
+    if (closeAllDiaryBtn && allDiaryModal) {
+      closeAllDiaryBtn.addEventListener("click", function () {
+        allDiaryModal.classList.remove("show");
+        setTimeout(function () {
+          allDiaryModal.classList.add("hidden");
+        }, 200);
+      });
+    }
+    // 點擊背景關閉日記 Modal
+    if (allDiaryModal) {
+      allDiaryModal.addEventListener("click", function (e) {
+        if (e.target === allDiaryModal.querySelector(".modal-backdrop")) {
+          allDiaryModal.classList.remove("show");
+          setTimeout(function () {
+            allDiaryModal.classList.add("hidden");
+          }, 200);
+        }
+      });
+    }
+
+    // 完成 Modal：「再來一輪」
+    if (modalAgainBtn) {
+      modalAgainBtn.addEventListener("click", function () {
+        hideCompletionModal();
+        startTimerSession();
+      });
+    }
+
+    // 完成 Modal：「先休息一下」
+    if (modalRestBtn) {
+      modalRestBtn.addEventListener("click", function () {
+        hideCompletionModal();
+        setBearMode("idle", true);
+      });
+    }
+
+    // 點擊完成 Modal 背景也關閉
+    if (completionModal) {
+      completionModal.addEventListener("click", function (e) {
+        if (e.target === completionModal.querySelector(".modal-backdrop")) {
+          hideCompletionModal();
         }
       });
     }
@@ -664,8 +787,8 @@
     updateStatsUI();
     resetTimerUI();
     updateDurationUI();
-    setBearMode("idle", true); // 一載入就用「閒置熊三選一＋閒置小語」
-    updateDiaryUI();
+    setBearMode("idle", true); // 一載入：閒置熊三選一＋閒置小語
+    updateTodayDiaryUI();
     updateAlarmsUI();
     setupEvents();
 
