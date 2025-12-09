@@ -10,7 +10,7 @@
   <div class="app">
     <header class="app-header">
       <h1>熊麻吉：陪你一起成長</h1>
-      <p>讓一隻小熊麻吉陪你一起讀書、運動、學新技能。</p>
+      <p>讓一隻小熊麻吉陪你一起學習、運動、放鬆、照顧自己。</p>
     </header>
 
     <div class="main-layout">
@@ -52,8 +52,8 @@
         </div>
       </section>
 
-      <!-- 📊 成長狀態 -->
-      <section class="stats">
+      <!-- 📊 成長狀態 + 四個圓圈活動 -->
+      <section class="growth-activities">
         <div class="stats-header">
           <h2>成長狀態</h2>
           <button id="openAllDiaryBtn" class="stats-diary-btn">成長日記</button>
@@ -63,41 +63,58 @@
           <span>等級</span>
           <span id="levelText">Lv. 1</span>
         </div>
-
-        <div class="stat-row">
-          <span>閱讀 📖</span>
-          <div class="stat-bar">
-            <div id="readingBar" class="stat-fill"></div>
-          </div>
-          <span id="readingValue" class="stat-value">0 分鐘</span>
+        <div class="level-small-row">
+          今日累積：<span id="totalMinutesText">0 分鐘</span>（每 3 小時升 1 級）
         </div>
 
-        <div class="stat-row">
-          <span>運動 💪</span>
-          <div class="stat-bar">
-            <div id="sportBar" class="stat-fill"></div>
+        <div class="activity-circle-row">
+          <!-- 學習 -->
+          <div class="activity-circle" data-activity="study">
+            <div class="activity-circle-outer" id="circle-study">
+              <div class="activity-circle-inner">
+                <div class="activity-icon">📚</div>
+                <div class="activity-label">學習</div>
+              </div>
+            </div>
+            <div class="activity-minutes" id="minutes-study">0 分鐘</div>
           </div>
-          <span id="sportValue" class="stat-value">0 分鐘</span>
-        </div>
 
-        <div class="stat-row">
-          <span>技能 🎵</span>
-          <div class="stat-bar">
-            <div id="skillBar" class="stat-fill"></div>
+          <!-- 運動 -->
+          <div class="activity-circle" data-activity="sport">
+            <div class="activity-circle-outer" id="circle-sport">
+              <div class="activity-circle-inner">
+                <div class="activity-icon">💪</div>
+                <div class="activity-label">運動</div>
+              </div>
+            </div>
+            <div class="activity-minutes" id="minutes-sport">0 分鐘</div>
           </div>
-          <span id="skillValue" class="stat-value">0 分鐘</span>
-        </div>
 
-        <div class="stat-row">
-          <span>休息 😴</span>
-          <div class="stat-bar">
-            <div id="sleepBar" class="stat-fill"></div>
+          <!-- 娛樂 -->
+          <div class="activity-circle" data-activity="fun">
+            <div class="activity-circle-outer" id="circle-fun">
+              <div class="activity-circle-inner">
+                <div class="activity-icon">🎮</div>
+                <div class="activity-label">娛樂</div>
+              </div>
+            </div>
+            <div class="activity-minutes" id="minutes-fun">0 分鐘</div>
           </div>
-          <span id="sleepValue" class="stat-value">0 分鐘</span>
+
+          <!-- 休息 -->
+          <div class="activity-circle" data-activity="rest">
+            <div class="activity-circle-outer" id="circle-rest">
+              <div class="activity-circle-inner">
+                <div class="activity-icon">😴</div>
+                <div class="activity-label">休息</div>
+              </div>
+            </div>
+            <div class="activity-minutes" id="minutes-rest">0 分鐘</div>
+          </div>
         </div>
       </section>
 
-      <!-- ⏳ 任務／定時 -->
+      <!-- ⏳ 任務／定時（不再有活動按鈕，活動在上面選） -->
       <section class="timer">
         <div class="timer-header-row">
           <h2>今天要做什麼？</h2>
@@ -107,16 +124,7 @@
           </div>
         </div>
 
-        <!-- 活動種類 + 睡覺 -->
-        <div class="activity-buttons">
-          <button class="activity-btn active" data-activity="reading">📖 看書</button>
-          <button class="activity-btn" data-activity="sport">💪 運動</button>
-          <button class="activity-btn" data-activity="skill">🎵 練技能</button>
-          <button class="activity-btn" data-activity="sleep">😴 睡覺</button>
-        </div>
-
-        <!-- 可累加的時間設定 -->
-        <h3>設定本次專注時間（可以累加調整）</h3>
+        <h3>設定本次時間（可以累加調整）</h3>
 
         <div class="step-select-row">
           <span class="step-label">每次調整：</span>
@@ -159,10 +167,10 @@
       <div class="completion-bear">🐻✨</div>
       <h3 id="completionTitle">太棒了！</h3>
       <p id="completionText">
-        你完成了一段專注時間，今天的你又升級了一點點！
+        你完成了一段時間，熊麻吉覺得你超棒！
       </p>
       <p id="completionStarsText" class="completion-stars-text">
-        本次專注「<span id="completionActivityLabel">看書</span>」
+        本次「<span id="completionActivityLabel">學習</span>」
         共 <span id="completionMinutesLabel">0</span> 分鐘，
         得到 <span id="completionStarsLabel">0</span> 顆星星 ⭐
       </p>
@@ -200,9 +208,10 @@
         <div class="alarm-row">
           <label for="alarmActivity">活動：</label>
           <select id="alarmActivity">
-            <option value="reading">📖 看書</option>
+            <option value="study">📚 學習</option>
             <option value="sport">💪 運動</option>
-            <option value="skill">🎵 練技能</option>
+            <option value="fun">🎮 娛樂</option>
+            <option value="rest">😴 休息</option>
           </select>
         </div>
 
@@ -213,7 +222,7 @@
 
         <div class="alarm-row">
           <label for="alarmLabel">備註：</label>
-          <input id="alarmLabel" type="text" placeholder="例如：睡前閱讀 / 晚上運動" />
+          <input id="alarmLabel" type="text" placeholder="例如：晚上運動 / 睡前閱讀" />
         </div>
 
         <button id="addAlarmBtn" class="primary-btn small-btn">新增鬧鐘</button>
@@ -237,7 +246,7 @@
 
       <p class="settings-tip">
         這裡可以調整熊麻吉的固定作息，會自動提醒睡覺和吃東西。<br>
-        夜間睡眠期間熊麻吉會進入睡覺模式唷。
+        預設是：21:30 睡、06:30 起床、07:00 / 12:00 / 18:00 肚子餓、12:30 午睡。
       </p>
 
       <div class="schedule-row">
