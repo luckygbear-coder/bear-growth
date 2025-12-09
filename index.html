@@ -15,6 +15,12 @@
 
     <!-- 🐻 熊熊區塊 -->
     <section class="bear-panel">
+      <!-- 回家按鈕（圖片右上角小小的） -->
+      <button class="home-btn"
+        onclick="window.location.href='https://luckygbear-coder.github.io/HeroApp/index.html';">
+        回家
+      </button>
+
       <div class="bear-visual mode-idle" id="bearVisual">
         <!-- 載入後會被 script.js 改成閒置熊三選一 -->
         <img id="bearImage" src="images/bear_idle1.png" alt="成長熊" />
@@ -26,7 +32,12 @@
 
     <!-- 📊 成長狀態 -->
     <section class="stats">
-      <h2>成長狀態</h2>
+      <div class="stats-header">
+        <h2>成長狀態</h2>
+        <!-- 成長日記按鈕（右上角） -->
+        <button id="openAllDiaryBtn" class="stats-diary-btn">成長日記</button>
+      </div>
+
       <div class="level-row">
         <span>等級</span>
         <span id="levelText">Lv. 1</span>
@@ -102,11 +113,6 @@
         <button class="ghost-btn" id="cancelButton" disabled>結束 / 取消</button>
       </div>
 
-      <!-- 📔 小日記大按鈕 -->
-      <div class="diary-actions">
-        <button id="openAllDiaryBtn" class="ghost-btn full-width">📔 小日記</button>
-      </div>
-
       <!-- 今日日記（預設展開，只顯示今天；可滑動） -->
       <div class="today-diary">
         <div class="today-diary-header">
@@ -152,12 +158,6 @@
         </div>
       </div>
     </section>
-
-    <footer class="app-footer">
-      <button class="link-btn" onclick="window.location.href='index.html';">
-        ⬅ 返回冒險者天堂首頁
-      </button>
-    </footer>
   </div>
 
   <!-- 🎉 完成任務鼓勵 Modal（熊熊跳出來） -->
