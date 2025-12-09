@@ -1,3 +1,12 @@
+// --------- 熊熊圖片對應 ---------
+const bearImages = {
+  idle: "images/bear_idle1.png",
+  reading: "images/bear_reading.png",
+  sport: "images/bear_sport.png",
+  skill: "images/bear_skill.png",
+  sleep: "images/bear_sleep.png"
+};
+
 // --------- 全域狀態 ---------
 let bearName = "熊麻吉";
 let totalStars = 0;
@@ -50,7 +59,6 @@ const shopItems = {
 };
 
 document.addEventListener("DOMContentLoaded", () => {
-  // 初始化
   loadAllState();
   bindUI();
   renderAll();
@@ -130,18 +138,24 @@ function bindUI() {
         .forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
       selectedActivity = btn.getAttribute("data-activity");
-      updateBearBubbleActivity();
+      updateBearActivityUI();
     });
   });
 
-  // 步進按鈕
+  // 步進按鈕（按一下就直接加時間 + 設定步長）
   document.querySelectorAll(".step-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
-      document
-        .querySelectorAll(".step-btn")
-        .forEach((b) => b.classList.remove("active"));
+      const step = Number(btn.dataset.step || btn.getAttribute("data-step") || 1);
+
+      document.querySelectorAll(".step-btn").forEach((b) => {
+        b.classList.remove("active");
+      });
       btn.classList.add("active");
-      stepMinutes = Number(btn.getAttribute("data-step"));
+
+      plannedMinutes = Math.min(600, plannedMinutes + step);
+      stepMinutes = step;
+
+      updateDurationDisplay();
     });
   });
 
@@ -213,7 +227,6 @@ function bindUI() {
     .getElementById("modalAgainBtn")
     .addEventListener("click", () => {
       toggleModal("completionModal", false);
-      // 保留原本設定的活動與時間，只重設 timer 顯示
       resetTimerUI();
     });
   document
@@ -227,6 +240,9 @@ function bindUI() {
   if (!localStorage.getItem("bearNameEverSet")) {
     toggleModal("nameModal", true);
   }
+
+  // 初始化活動 UI（預設看書）
+  updateBearActivityUI();
 }
 
 // --------- Render ---------
@@ -236,7 +252,6 @@ function renderAll() {
   updateDurationDisplay();
   renderStats();
   renderDiaryList();
-  updateBearBubbleActivity();
 }
 
 function updateStarDisplay() {
@@ -251,7 +266,7 @@ function updateDurationDisplay() {
 
 function renderStats() {
   const total = readingMinutes + sportMinutes + skillMinutes;
-  const maxBase = Math.max(30, total); // 以總時間決定條長
+  const maxBase = Math.max(30, total);
 
   setBar("readingBar", readingMinutes, maxBase);
   setBar("sportBar", sportMinutes, maxBase);
@@ -262,7 +277,7 @@ function renderStats() {
   document.getElementById("sportValue").textContent = sportMinutes + " 分鐘";
   document.getElementById("skillValue").textContent = skillMinutes + " 分鐘";
 
-  const level = 1 + Math.floor(total / 60); // 每 60 分鐘升 1 等
+  const level = 1 + Math.floor(total / 60);
   document.getElementById("levelText").textContent = "Lv. " + level;
 }
 
@@ -307,8 +322,44 @@ function saveBearNameFromModal() {
   setBearBubble(`🐻 很高興跟你一起長大，我叫「${bearName}」！`);
 }
 
+// --------- Bear UI 根據活動 ---------
+function updateBearActivityUI() {
+  const bearImg = document.getElementById("bearImage");
+
+  if (selectedActivity === "sleep") {
+    if (bearImg) bearImg.src = bearImages.sleep || bearImages.idle;
+    setBearBubble("🐻 我有點想睡覺了…呼～呼～😴");
+    document.getElementById("timerDisplay").textContent = "睡覺中，不需計時。";
+    document.getElementById("timerProgressFill").style.width = "0%";
+    document.getElementById("startButton").disabled = true;
+    document.getElementById("cancelButton").disabled = true;
+    return;
+  }
+
+  // 其他活動
+  const label = getActivityLabel(selectedActivity);
+  if (bearImg) {
+    bearImg.src = bearImages[selectedActivity] || bearImages.idle;
+  }
+  setBearBubble(`🐻 今天要一起「${label}」嗎？`);
+
+  // 恢復按鈕狀態（如果沒有在計時）
+  if (!timerIntervalId) {
+    document.getElementById("startButton").disabled = false;
+    document.getElementById("cancelButton").disabled = true;
+    if (!plannedMinutes) {
+      document.getElementById("timerDisplay").textContent = "尚未開始";
+    }
+  }
+}
+
 // --------- Timer ---------
 function startTimer() {
+  if (selectedActivity === "sleep") {
+    alert("睡覺不用計時，只要好好休息就好～😴");
+    return;
+  }
+
   if (timerIntervalId) return;
   if (plannedMinutes <= 0) {
     alert("請先設定本次專注時間喔！");
@@ -375,7 +426,6 @@ function onTimerFinished() {
   document.getElementById("startButton").disabled = false;
   document.getElementById("cancelButton").disabled = true;
 
-  // 這次專注分鐘數
   const minutes = plannedMinutes;
   const starsEarned = minutes; // 每分鐘 1 星
 
@@ -440,6 +490,7 @@ function getActivityLabel(key) {
   if (key === "reading") return "看書";
   if (key === "sport") return "運動";
   if (key === "skill") return "練技能";
+  if (key === "sleep") return "睡覺";
   return "活動";
 }
 
@@ -447,11 +498,6 @@ function getActivityLabel(key) {
 function setBearBubble(text) {
   const el = document.getElementById("bearBubble");
   if (el) el.textContent = text;
-}
-
-function updateBearBubbleActivity() {
-  const label = getActivityLabel(selectedActivity);
-  setBearBubble(`🐻 今天要一起「${label}」嗎？`);
 }
 
 // --------- Modal 工具 ---------
@@ -599,7 +645,6 @@ function openShop() {
   if (!modal) return;
   modal.style.display = "flex";
 
-  // 預設顯示主食
   document
     .querySelectorAll(".tab-btn")
     .forEach((b) => b.classList.remove("active"));
