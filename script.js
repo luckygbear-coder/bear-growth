@@ -1204,3 +1204,6 @@ function changeSatiety(delta) {
   satietyValue = Math.max(0, Math.min(100, satietyValue + delta));
   updateSatietyUI();
 }
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js');
+}
