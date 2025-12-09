@@ -2,15 +2,15 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <title>成長熊 · 電子養成夥伴</title>
+  <title>熊麻吉：陪你一起成長</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="app">
     <header class="app-header">
-      <h1>成長熊 · 電子養成夥伴</h1>
-      <p>選一件事，讓熊熊陪你一起專心完成。</p>
+      <h1>熊麻吉：陪你一起成長</h1>
+      <p>讓一隻小熊麻吉陪你一起讀書、運動、學新技能。</p>
     </header>
 
     <!-- 🐻 熊熊區塊 -->
@@ -21,12 +21,21 @@
         回家
       </button>
 
+      <!-- 熊麻吉畫面 -->
       <div class="bear-visual mode-idle" id="bearVisual">
-        <!-- 載入後會被 script.js 改成閒置熊三選一 -->
-        <img id="bearImage" src="images/bear_idle1.png" alt="成長熊" />
+        <img id="bearImage" src="images/bear_idle1.png" alt="熊麻吉" />
       </div>
+
+      <!-- 熊熊對話 -->
       <div class="bear-bubble" id="bearBubble">
-        🐻 我們今天要一起做什麼呢？
+        🐻 我是熊麻吉～今天想一起做什麼呢？
+      </div>
+
+      <!-- 熊熊名字列 -->
+      <div class="bear-name-row">
+        <span class="bear-name-label">熊熊名字：</span>
+        <span id="bearNameLabel" class="bear-name-value">熊麻吉</span>
+        <button id="editNameBtn" class="bear-name-edit-btn">改名字</button>
       </div>
     </section>
 
@@ -71,8 +80,10 @@
     <section class="timer">
       <div class="timer-header-row">
         <h2>今天要做什麼？</h2>
-        <!-- 小顆鬧鐘按鈕 -->
-        <button id="openAlarmModalBtn" class="timer-alarm-btn">⏰ 鬧鐘</button>
+        <div class="timer-header-actions">
+          <button id="openAlarmModalBtn" class="timer-alarm-btn">⏰ 鬧鐘</button>
+          <button id="openScheduleBtn" class="timer-schedule-btn">⚙ 作息設定</button>
+        </div>
       </div>
 
       <!-- 活動種類 -->
@@ -118,14 +129,14 @@
     </section>
   </div>
 
-  <!-- 🎉 完成任務鼓勵 Modal（熊熊跳出來） -->
+  <!-- 🎉 完成任務鼓勵 Modal -->
   <div id="completionModal" class="modal hidden">
     <div class="modal-backdrop"></div>
     <div class="modal-card completion-card">
       <div class="completion-bear">🐻✨</div>
       <h3 id="completionTitle">太棒了！</h3>
       <p id="completionText">
-        你完成了 20 分鐘的閱讀，今天的你又升級了一點點！
+        你完成了一段時間的練習，今天的你又升級了一點點！
       </p>
       <div class="modal-actions">
         <button id="modalAgainBtn" class="primary-btn full-width">再來一輪</button>
@@ -139,7 +150,7 @@
     <div class="modal-backdrop"></div>
     <div class="modal-card diary-card">
       <div class="modal-header-row">
-        <h3>成長熊的小日記</h3>
+        <h3>熊麻吉的成長日記</h3>
         <button id="closeAllDiaryBtn" class="icon-btn">✕</button>
       </div>
       <div id="allDiaryList" class="diary-list all-diary-list">
@@ -184,6 +195,84 @@
       <div id="alarmList" class="alarm-list">
         目前還沒有鬧鐘，試著安排一個吧！
       </div>
+    </div>
+  </div>
+
+  <!-- 💤 作息設定 Modal -->
+  <div id="scheduleModal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-card settings-card">
+      <div class="modal-header-row">
+        <h3>作息時間設定</h3>
+        <button id="closeScheduleBtn" class="icon-btn">✕</button>
+      </div>
+
+      <p class="settings-tip">
+        這裡可以調整熊麻吉的固定作息，會自動提醒睡覺和吃東西。<br>
+        夜間睡眠（預設 22:00–06:00）期間熊麻吉會進入睡覺模式唷。
+      </p>
+
+      <div class="schedule-row">
+        <label for="sleepStartInput">晚上睡覺開始：</label>
+        <input id="sleepStartInput" type="time">
+      </div>
+
+      <div class="schedule-row">
+        <label for="sleepEndInput">早上起床時間：</label>
+        <input id="sleepEndInput" type="time">
+      </div>
+
+      <div class="schedule-row">
+        <label for="hungryMorningInput">早上肚子餓：</label>
+        <input id="hungryMorningInput" type="time">
+      </div>
+
+      <div class="schedule-row">
+        <label for="hungryNoonInput">中午肚子餓：</label>
+        <input id="hungryNoonInput" type="time">
+      </div>
+
+      <div class="schedule-row">
+        <label for="napStartInput">午睡開始：</label>
+        <input id="napStartInput" type="time">
+      </div>
+
+      <div class="schedule-row">
+        <label for="napDurationInput">午睡分鐘：</label>
+        <input id="napDurationInput" type="number" min="10" max="120" step="5">
+      </div>
+
+      <div class="schedule-row">
+        <label for="hungryEveningInput">傍晚肚子餓：</label>
+        <input id="hungryEveningInput" type="time">
+      </div>
+
+      <button id="saveScheduleBtn" class="primary-btn full-width">
+        儲存作息設定
+      </button>
+    </div>
+  </div>
+
+  <!-- 🐻 取名字 / 改名字 Modal -->
+  <div id="nameModal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-card name-card">
+      <div class="modal-header-row">
+        <h3 id="nameModalTitle">幫熊熊取名字</h3>
+        <button id="closeNameBtn" class="icon-btn">✕</button>
+      </div>
+      <p class="settings-tip">
+        可以幫你的熊麻吉取一個專屬名字，之後也可以再修改。<br>
+        不知道叫什麼時，可以先用預設的「熊麻吉」。
+      </p>
+      <div class="schedule-row">
+        <label for="bearNameInput">熊熊名字：</label>
+        <input id="bearNameInput" type="text" maxlength="10"
+               placeholder="例如：小勇熊、暖暖熊……">
+      </div>
+      <button id="saveNameBtn" class="primary-btn full-width">
+        確認名字
+      </button>
     </div>
   </div>
 
