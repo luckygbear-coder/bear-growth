@@ -862,5 +862,43 @@ body {
   border: 1px solid #f4d7af;
   margin-bottom: 4px;
 }
+/* --------- 好心情 / 飽足感 --------- */
+.mood-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+  font-size: 11px;
+}
 
+.mood-title {
+  white-space: nowrap;
+}
+
+.mood-bar {
+  flex: 1;
+  height: 6px;
+  border-radius: 999px;
+  background: #ffe3ec;
+  overflow: hidden;
+}
+
+.mood-fill {
+  height: 100%;
+  width: 50%; /* 初始平靜 */
+  border-radius: 999px;
+  background: linear-gradient(to right, #ff9fb7, #ffc78a);
+  transition: width 0.25s ease;
+}
+
+.satiety-fill {
+  background: linear-gradient(to right, #ffd37a, #ff9b72);
+}
+
+.mood-label {
+  min-width: 42px;
+  text-align: right;
+  font-size: 11px;
+  color: #9a4b5c;
+}
 /* ===== End of style.css ===== */
