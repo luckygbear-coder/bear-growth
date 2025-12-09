@@ -60,7 +60,7 @@ body {
   border: 2px solid #f3c9b0;
   padding: 8px 10px 10px;
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
-  flex: 0 0 38%;
+  flex: 0 0 36%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -71,10 +71,10 @@ body {
   background: #fff7f3;
   border-radius: 16px;
   border: 2px solid #f3d0bf;
-  padding: 6px 10px 8px;
+  padding: 6px 10px 6px;
   margin: 0;
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
-  flex: 0 0 26%;
+  flex: 0 0 30%;
   min-height: 0;
 }
 
@@ -252,11 +252,52 @@ body {
 .level-small-row {
   font-size: 11px;
   color: #a37267;
-  margin-bottom: 2px;
+  margin-bottom: 1px;
+}
+
+/* 好心情 / 飽足感 條 */
+.mood-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 2px 0;
+  font-size: 11px;
+}
+
+.mood-title {
+  white-space: nowrap;
+}
+
+.mood-bar {
+  flex: 1;
+  height: 6px;
+  border-radius: 999px;
+  background: #ffe3ec;
+  overflow: hidden;
+}
+
+.mood-fill {
+  height: 100%;
+  width: 50%; /* 初始平靜 */
+  border-radius: 999px;
+  background: linear-gradient(to right, #ff9fb7, #ffc78a);
+  transition: width 0.25s ease;
+}
+
+.satiety-fill {
+  background: linear-gradient(to right, #ffd37a, #ff9b72);
+}
+
+.mood-label {
+  min-width: 44px;
+  text-align: right;
+  font-size: 11px;
+  color: #9a4b5c;
 }
 
 /* 四個圓圈 */
 .activity-circle-row {
+  margin-top: 4px;
   display: flex;
   justify-content: space-between;
   gap: 4px;
@@ -862,43 +903,9 @@ body {
   border: 1px solid #f4d7af;
   margin-bottom: 4px;
 }
-/* --------- 好心情 / 飽足感 --------- */
-.mood-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 2px;
-  font-size: 11px;
-}
 
-.mood-title {
-  white-space: nowrap;
+/* 背包 Modal */
+#bagModal .shop-window {
+  background: #fff7fb;
+  border-color: #f0c4e2;
 }
-
-.mood-bar {
-  flex: 1;
-  height: 6px;
-  border-radius: 999px;
-  background: #ffe3ec;
-  overflow: hidden;
-}
-
-.mood-fill {
-  height: 100%;
-  width: 50%; /* 初始平靜 */
-  border-radius: 999px;
-  background: linear-gradient(to right, #ff9fb7, #ffc78a);
-  transition: width 0.25s ease;
-}
-
-.satiety-fill {
-  background: linear-gradient(to right, #ffd37a, #ff9b72);
-}
-
-.mood-label {
-  min-width: 42px;
-  text-align: right;
-  font-size: 11px;
-  color: #9a4b5c;
-}
-/* ===== End of style.css ===== */
