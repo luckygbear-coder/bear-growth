@@ -23,6 +23,7 @@
 
       <!-- 熊麻吉畫面 -->
       <div class="bear-visual mode-idle" id="bearVisual">
+        <!-- 這裡用你原本的熊麻吉圖片檔名 -->
         <img id="bearImage" src="images/bear_idle1.png" alt="熊麻吉" />
       </div>
 
@@ -37,9 +38,21 @@
         <span id="bearNameLabel" class="bear-name-value">熊麻吉</span>
         <button id="editNameBtn" class="bear-name-edit-btn">改名字</button>
       </div>
+
+      <!-- ⭐ 星星＆商店 -->
+      <div class="star-shop-bar" onclick="openShop()">
+        <div class="star-shop-left">
+          <span class="star-icon">⭐</span>
+          <span class="star-label">星星商店</span>
+        </div>
+        <div class="star-shop-right">
+          <span class="star-count-label">目前星星：</span>
+          <span id="starCount" class="star-count-value">0</span>
+        </div>
+      </div>
     </section>
 
-    <!-- 📊 成長狀態（右上角有成長日記） -->
+    <!-- 📊 成長狀態 -->
     <section class="stats">
       <div class="stats-header">
         <h2>成長狀態</h2>
@@ -138,6 +151,11 @@
       <p id="completionText">
         你完成了一段時間的練習，今天的你又升級了一點點！
       </p>
+      <p id="completionStarsText" class="completion-stars-text">
+        本次專注「<span id="completionActivityLabel">看書</span>」
+        共 <span id="completionMinutesLabel">0</span> 分鐘，
+        得到 <span id="completionStarsLabel">0</span> 顆星星 ⭐
+      </p>
       <div class="modal-actions">
         <button id="modalAgainBtn" class="primary-btn full-width">再來一輪</button>
         <button id="modalRestBtn" class="ghost-btn full-width">先休息一下</button>
@@ -209,7 +227,7 @@
 
       <p class="settings-tip">
         這裡可以調整熊麻吉的固定作息，會自動提醒睡覺和吃東西。<br>
-        夜間睡眠（預設 22:00–06:00）期間熊麻吉會進入睡覺模式唷。
+        夜間睡眠期間熊麻吉會進入睡覺模式唷。
       </p>
 
       <div class="schedule-row">
@@ -275,6 +293,41 @@
       </button>
     </div>
   </div>
+
+  <!-- ⭐ 星星結果訊息（活動結束彈出用） -->
+  <div id="starResultToast" class="toast-panel"></div>
+
+  <!-- 🛒 商店視窗 -->
+  <div id="shopModal" class="shop-modal">
+    <div class="shop-window">
+      <button class="shop-close-btn" type="button" onclick="closeShop()">✖</button>
+      <h2>⭐ 星星商店</h2>
+      <p class="shop-tip">每活動 1 分鐘 = 1 顆星星，來幫熊麻吉補充體力、佈置房間吧！</p>
+
+      <!-- 分類分頁 -->
+      <div class="tabs">
+        <button type="button" class="tab-btn" onclick="switchTab('food')">🍱 主食</button>
+        <button type="button" class="tab-btn" onclick="switchTab('fruits')">🍎 水果</button>
+        <button type="button" class="tab-btn" onclick="switchTab('desserts')">🍰 甜點</button>
+        <button type="button" class="tab-btn" onclick="switchTab('furniture')">🏠 傢俱</button>
+        <button type="button" class="tab-btn" onclick="switchTab('study')">📚 學習用品</button>
+        <button type="button" class="tab-btn" onclick="switchTab('fun')">🎮 娛樂用品</button>
+      </div>
+
+      <div id="shopItemsArea" class="shop-items-area">
+        <!-- 由 JS 動態產生 -->
+      </div>
+
+      <div class="owned-items-box">
+        <h3>熊麻吉現在擁有</h3>
+        <ul id="ownedItemsList" class="owned-items-list">
+          <li>還沒有買任何東西，先去逛逛商店吧！</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 星星飛行動畫的元素由 JS 動態插入 -->
 
   <script src="script.js"></script>
 </body>
