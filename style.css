@@ -1,6 +1,11 @@
-/* 全域設定：柔和童話感配色 */
+/* 全域設定：柔和童話感配色，手機單頁版 */
 * {
   box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
 }
 
 body {
@@ -10,31 +15,34 @@ body {
     sans-serif;
   background: linear-gradient(180deg, #fff3da, #ffe7ff);
   color: #4b3044;
+  overflow: hidden; /* 不要整頁捲動 */
 }
 
-/* 主容器 */
+/* 主容器：固定滿版，高度不捲動 */
 .app {
   max-width: 480px;
   margin: 0 auto;
-  min-height: 100vh;
-  padding: 16px 16px 32px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 10px 12px 12px;
 }
 
 /* 標題區 */
 .app-header {
   text-align: center;
-  margin-bottom: 12px;
+  margin-bottom: 4px;
 }
 
 .app-header h1 {
-  font-size: 24px;
-  margin: 4px 0;
+  font-size: 20px;
+  margin: 2px 0;
   color: #91436b;
   text-shadow: 0 2px 0 rgba(255, 255, 255, 0.8);
 }
 
 .app-header p {
-  font-size: 14px;
+  font-size: 12px;
   margin: 0;
   color: #7a4a5b;
 }
@@ -42,11 +50,28 @@ body {
 /* 卡片共用樣式 */
 section {
   background: rgba(255, 255, 255, 0.9);
-  border-radius: 18px;
+  border-radius: 16px;
   border: 2px solid #f2c8a2;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
-  padding: 12px 14px 14px;
-  margin-top: 12px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+  padding: 8px 10px 10px;
+}
+
+/* 版面分配：熊熊 + 狀態 + timer */
+.bear-panel {
+  flex: 0 0 auto;
+  margin-bottom: 6px;
+}
+
+.stats {
+  flex: 0 0 auto;
+  margin-bottom: 6px;
+}
+
+.timer {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Timer 區內部控制捲動 */
 }
 
 /* 🐻 熊熊面板 */
@@ -58,8 +83,8 @@ section {
 
 /* 熊熊視覺區：固定大小，不讓圖片蓋滿畫面 */
 .bear-visual {
-  width: 200px;
-  height: 200px;
+  width: 170px;
+  height: 170px;
   border-radius: 50%;
   margin-top: 4px;
   background: radial-gradient(circle at 30% 20%, #ffe7ad, #ffc3d4);
@@ -107,13 +132,13 @@ section {
 
 /* 熊熊對話泡泡 */
 .bear-bubble {
-  margin-top: 10px;
-  font-size: 13px;
+  margin-top: 6px;
+  font-size: 12px;
   line-height: 1.5;
   background: #fffaf0;
-  border-radius: 16px;
+  border-radius: 14px;
   border: 1px dashed #f0b882;
-  padding: 8px 10px;
+  padding: 6px 8px;
   position: relative;
   max-width: 100%;
 }
@@ -121,9 +146,9 @@ section {
 .bear-bubble::before {
   content: "";
   position: absolute;
-  top: -8px;
+  top: -7px;
   left: 22px;
-  border-width: 0 8px 8px 8px;
+  border-width: 0 7px 7px 7px;
   border-style: solid;
   border-color: transparent transparent #fffaf0 transparent;
 }
@@ -131,8 +156,8 @@ section {
 /* 📊 成長狀態 */
 .stats h2,
 .timer h2 {
-  margin: 0 0 8px;
-  font-size: 18px;
+  margin: 0 0 4px;
+  font-size: 14px;
   color: #85415b;
 }
 
@@ -140,8 +165,8 @@ section {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 14px;
-  margin-bottom: 6px;
+  font-size: 13px;
+  margin-bottom: 4px;
 }
 
 #levelText {
@@ -152,14 +177,14 @@ section {
 .stat-row {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-top: 6px;
-  font-size: 13px;
+  gap: 4px;
+  margin-top: 4px;
+  font-size: 11px;
 }
 
 .stat-bar {
   flex: 1;
-  height: 8px;
+  height: 6px;
   border-radius: 999px;
   background: #f5e1d1;
   overflow: hidden;
@@ -174,42 +199,37 @@ section {
 }
 
 .stat-value {
-  min-width: 60px;
+  min-width: 52px;
   text-align: right;
-  font-size: 12px;
+  font-size: 10px;
   color: #7a4a5b;
 }
 
 /* ⏳ 任務與定時器 */
 .timer h3 {
-  margin: 10px 0 4px;
-  font-size: 14px;
+  margin: 6px 0 4px;
+  font-size: 12px;
   color: #7a4a5b;
 }
 
 /* 活動按鈕 */
 .activity-buttons {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  flex-wrap: nowrap;
+  gap: 4px;
 }
 
 .activity-btn {
   flex: 1;
-  min-width: 90px;
   border-radius: 999px;
   border: 1px solid #f1c3a7;
-  padding: 6px 8px;
-  font-size: 13px;
+  padding: 5px 6px;
+  font-size: 12px;
   background: #fff7e6;
   color: #7a4a5b;
   cursor: pointer;
   box-shadow: 0 2px 0 rgba(255, 255, 255, 0.8);
   transition: all 0.15s ease;
-}
-
-.activity-btn:hover {
-  transform: translateY(-1px);
 }
 
 .activity-btn.active {
@@ -220,11 +240,11 @@ section {
 
 /* 調整步進值 */
 .step-select-row {
-  margin-top: 8px;
+  margin-top: 4px;
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 13px;
+  gap: 4px;
+  font-size: 11px;
   color: #7a4a5b;
 }
 
@@ -235,14 +255,14 @@ section {
 .step-buttons {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 4px;
 }
 
 .step-btn {
   border-radius: 999px;
   border: 1px solid #f1c3a7;
-  padding: 4px 8px;
-  font-size: 12px;
+  padding: 3px 7px;
+  font-size: 11px;
   background: #fff7e6;
   color: #7a4a5b;
   cursor: pointer;
@@ -256,44 +276,44 @@ section {
 
 /* + / - 調時間 */
 .duration-control {
-  margin-top: 8px;
+  margin-top: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .round-btn {
-  width: 40px;
-  height: 40px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   border: 1px solid #f1c3a7;
   background: #fffaf0;
-  font-size: 20px;
+  font-size: 18px;
   cursor: pointer;
   color: #7a4a5b;
 }
 
 .duration-display {
-  min-width: 90px;
+  min-width: 80px;
   text-align: center;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   color: #7a4a5b;
 }
 
 /* 定時器顯示與進度條 */
 .timer-display {
-  margin-top: 10px;
-  font-size: 14px;
+  margin-top: 4px;
+  font-size: 12px;
   text-align: center;
   color: #7a4a5b;
 }
 
 .timer-progress {
-  margin-top: 6px;
+  margin-top: 4px;
   width: 100%;
-  height: 8px;
+  height: 6px;
   border-radius: 999px;
   background: #f5e1d1;
   overflow: hidden;
@@ -309,8 +329,8 @@ section {
 /* 按鈕 */
 .timer-actions {
   display: flex;
-  gap: 8px;
-  margin-top: 12px;
+  gap: 6px;
+  margin-top: 6px;
 }
 
 .primary-btn,
@@ -318,8 +338,8 @@ section {
 .link-btn {
   flex: 1;
   border-radius: 999px;
-  padding: 8px 10px;
-  font-size: 14px;
+  padding: 7px 8px;
+  font-size: 13px;
   cursor: pointer;
   border: none;
 }
@@ -347,77 +367,75 @@ section {
   cursor: default;
 }
 
-/* 小日記 */
-.diary-actions {
-  margin-top: 12px;
-}
-
-.diary-panel {
-  margin-top: 10px;
-  padding: 8px 10px 10px;
-  border-radius: 14px;
+/* 今日日記 */
+.today-diary {
+  margin-top: 6px;
   background: #fffaf0;
+  border-radius: 12px;
   border: 1px dashed #f1c3a7;
-  max-height: 200px;
-  overflow-y: auto;
+  padding: 6px 8px;
+  flex: 0 0 auto;
 }
 
-.diary-panel h3 {
-  margin: 0 0 6px;
-  font-size: 14px;
+.today-diary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  margin-bottom: 4px;
   color: #85415b;
 }
 
-.diary-list {
+.link-like-btn {
+  border: none;
+  background: none;
+  padding: 0;
+  color: #91436b;
   font-size: 12px;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
-.diary-item {
-  padding: 4px 0;
-  border-bottom: 1px dashed #f1c3a7;
-  font-size: 12px;
-}
-
-.diary-item:last-child {
-  border-bottom: none;
-}
-
-.diary-main {
+.today-diary-list {
+  max-height: 70px;
+  overflow-y: auto;
+  font-size: 11px;
   color: #7a4a5b;
-}
-
-.diary-sub {
-  color: #9a6b7a;
-  margin-top: 2px;
 }
 
 /* 鬧鐘區塊 */
 .soft-hr {
-  margin: 14px 0 10px;
+  margin: 6px 0 6px;
   border: none;
   border-top: 1px dashed #f1c3a7;
 }
 
+.alarm-block {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
 .alarm-block h3 {
-  margin: 0 0 6px;
-  font-size: 14px;
+  margin: 0 0 4px;
+  font-size: 13px;
   color: #85415b;
 }
 
 .alarm-form {
-  margin-bottom: 8px;
-  font-size: 13px;
+  font-size: 11px;
 }
 
 .alarm-row {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-bottom: 6px;
+  gap: 4px;
+  margin-bottom: 4px;
 }
 
 .alarm-row label {
-  width: 48px;
+  width: 40px;
   color: #7a4a5b;
 }
 
@@ -426,40 +444,40 @@ section {
   flex: 1;
   border-radius: 999px;
   border: 1px solid #f1c3a7;
-  padding: 4px 8px;
-  font-size: 13px;
+  padding: 3px 7px;
+  font-size: 11px;
   background: #fffdf6;
 }
 
 .small-btn {
   width: 100%;
-  margin-top: 4px;
+  margin-top: 2px;
   padding: 6px 8px;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .alarm-tip {
-  margin: 4px 0 0;
-  font-size: 11px;
+  margin: 3px 0 2px;
+  font-size: 10px;
   color: #b1848f;
 }
 
 .alarm-list {
-  margin-top: 6px;
-  font-size: 12px;
-  max-height: 180px;
+  margin-top: 2px;
+  font-size: 11px;
+  max-height: 70px;
   overflow-y: auto;
   background: #fffaf0;
   border-radius: 10px;
   border: 1px dashed #f1c3a7;
-  padding: 6px 8px;
+  padding: 4px 6px;
 }
 
 .alarm-item {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  padding: 4px 0;
+  padding: 3px 0;
   border-bottom: 1px dashed #f1c3a7;
 }
 
@@ -487,16 +505,16 @@ section {
 .alarm-actions {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  margin-left: 6px;
+  gap: 2px;
+  margin-left: 4px;
 }
 
 .toggle-btn,
 .delete-btn {
   border-radius: 999px;
   border: 1px solid #f1c3a7;
-  padding: 2px 6px;
-  font-size: 11px;
+  padding: 1px 5px;
+  font-size: 10px;
   background: #fffdf6;
   color: #7a4a5b;
   cursor: pointer;
@@ -504,7 +522,8 @@ section {
 
 /* footer */
 .app-footer {
-  margin-top: 14px;
+  flex: 0 0 auto;
+  margin-top: 6px;
   text-align: center;
 }
 
@@ -514,20 +533,146 @@ section {
   color: #91436b;
   border-radius: 999px;
   border: 1px dashed #f1c3a7;
+  font-size: 12px;
+  padding: 6px 8px;
 }
 
-/* 小螢幕優化 */
-@media (max-width: 400px) {
-  .app {
-    padding: 10px 10px 24px;
-  }
+/* Modal 共用樣式 */
+.modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 999;
+}
 
+.modal.show {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.modal-card {
+  position: relative;
+  z-index: 1;
+  width: 85%;
+  max-width: 360px;
+  background: #fffaf0;
+  border-radius: 18px;
+  border: 2px solid #f2c8a2;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  padding: 12px 14px 14px;
+}
+
+/* 完成鼓勵 Modal */
+.completion-card {
+  text-align: center;
+}
+
+.completion-bear {
+  font-size: 32px;
+  margin-bottom: 4px;
+}
+
+.completion-card h3 {
+  margin: 0 0 4px;
+  font-size: 18px;
+  color: #85415b;
+}
+
+.completion-card p {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: #7a4a5b;
+}
+
+.modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+/* 日記 Modal */
+.diary-card h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #85415b;
+}
+
+.modal-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.icon-btn {
+  border: none;
+  background: none;
+  font-size: 16px;
+  cursor: pointer;
+  color: #7a4a5b;
+}
+
+.all-diary-list {
+  max-height: 260px;
+  overflow-y: auto;
+  font-size: 12px;
+}
+
+/* 日記內容共用 */
+.diary-list {
+  font-size: 12px;
+}
+
+.diary-item {
+  padding: 3px 0;
+  border-bottom: 1px dashed #f1c3a7;
+}
+
+.diary-item:last-child {
+  border-bottom: none;
+}
+
+.diary-main {
+  color: #7a4a5b;
+}
+
+.diary-sub {
+  color: #9a6b7a;
+  margin-top: 1px;
+}
+
+/* 隱藏用 */
+.hidden {
+  display: none;
+}
+
+/* 小螢幕再縮小一點 */
+@media (max-width: 360px) {
   .bear-visual {
-    width: 170px;
-    height: 170px;
+    width: 155px;
+    height: 155px;
   }
 
   #bearImage {
     width: 78%;
+  }
+
+  .app-header h1 {
+    font-size: 18px;
   }
 }
