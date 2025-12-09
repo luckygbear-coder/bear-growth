@@ -60,6 +60,10 @@ section {
 .bear-panel {
   flex: 0 0 auto;
   margin-bottom: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative; /* 給回家按鈕定位 */
 }
 
 .stats {
@@ -75,10 +79,19 @@ section {
 }
 
 /* 🐻 熊熊面板 */
-.bear-panel {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+
+/* 回家按鈕（圖片右上角） */
+.home-btn {
+  position: absolute;
+  top: 0;
+  right: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid #f1c3a7;
+  background: rgba(255, 250, 240, 0.95);
+  font-size: 11px;
+  color: #91436b;
+  cursor: pointer;
 }
 
 /* 熊熊視覺區：固定大小，不讓圖片蓋滿畫面 */
@@ -154,7 +167,30 @@ section {
 }
 
 /* 📊 成長狀態 */
-.stats h2,
+.stats-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.stats-header h2 {
+  margin: 0;
+  font-size: 14px;
+  color: #85415b;
+}
+
+/* 成長日記按鈕 */
+.stats-diary-btn {
+  border-radius: 999px;
+  border: 1px solid #f1c3a7;
+  padding: 3px 8px;
+  font-size: 11px;
+  background: #fffaf0;
+  color: #91436b;
+  cursor: pointer;
+}
+
 .timer h2 {
   margin: 0 0 4px;
   font-size: 14px;
@@ -334,8 +370,7 @@ section {
 }
 
 .primary-btn,
-.ghost-btn,
-.link-btn {
+.ghost-btn {
   flex: 1;
   border-radius: 999px;
   padding: 7px 8px;
@@ -365,15 +400,6 @@ section {
 .ghost-btn:disabled {
   opacity: 0.5;
   cursor: default;
-}
-
-/* 小日記按鈕 */
-.diary-actions {
-  margin-top: 4px;
-}
-
-.full-width {
-  width: 100%;
 }
 
 /* 今日日記 */
@@ -517,23 +543,6 @@ section {
   background: #fffdf6;
   color: #7a4a5b;
   cursor: pointer;
-}
-
-/* footer */
-.app-footer {
-  flex: 0 0 auto;
-  margin-top: 6px;
-  text-align: center;
-}
-
-.link-btn {
-  width: 100%;
-  background: transparent;
-  color: #91436b;
-  border-radius: 999px;
-  border: 1px dashed #f1c3a7;
-  font-size: 12px;
-  padding: 6px 8px;
 }
 
 /* Modal 共用樣式 */
