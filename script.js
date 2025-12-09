@@ -22,27 +22,36 @@ const defaultSchedule = {
 let bearName = "熊麻吉";
 let totalStars = 0;
 
+// 各活動累積分鐘
 let studyMinutes = 0;
 let sportMinutes = 0;
 let funMinutes = 0;
 let restMinutes = 0;
 
+// 小獎狀（依四個活動累積 60 分鐘一圈計算）
+let totalTrophies = 0;
+
 let diaryEntries = []; // { time, activity, label, minutes }
 
-let alarms = []; // { id, activity, time, label }
+let alarms = []; // { id, activity, time, label, lastTriggeredDate }
 let scheduleSettings = {};
 
+let ownedItems = {}; // { id: { name, category, categoryName, count } }
+
+// 目前活動：study / sport / fun / rest
 let selectedActivity = "study";
 let lastNonRestActivity = "study";
 
+// 時間步長與設定時間
 let stepMinutes = 1;
 let plannedMinutes = 0;
 
+// Timer 狀態
+let currentTimerMode = "none"; // 'none' | 'countdown' | 'stopwatch'
 let timerSecondsLeft = 0;
 let timerTotalSeconds = 0;
+let stopwatchSeconds = 0;
 let timerIntervalId = null;
-
-let ownedItems = {}; // { id: { name, categoryName, count } }
 
 // 商店商品
 const shopItems = {
@@ -83,7 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setInterval(checkAlarms, 30000);
 });
 
-// --------- 載入 / 儲存 ---------
+// --------- 讀取 / 儲存 ---------
 function loadAllState() {
   const nameSaved = localStorage.getItem("bearName");
   if (nameSaved) bearName = nameSaved;
@@ -109,7 +118,6 @@ function loadAllState() {
   const scheduleSaved = localStorage.getItem("bearSchedule");
   if (scheduleSaved) {
     scheduleSettings = JSON.parse(scheduleSaved);
-    // 把沒有的欄位補上預設值
     Object.keys(defaultSchedule).forEach((k) => {
       if (!scheduleSettings[k]) scheduleSettings[k] = defaultSchedule[k];
     });
@@ -119,6 +127,9 @@ function loadAllState() {
 
   const ownedSaved = localStorage.getItem("bearOwnedItems");
   ownedItems = ownedSaved ? JSON.parse(ownedSaved) : {};
+
+  const trophySaved = localStorage.getItem("bearTrophies");
+  totalTrophies = trophySaved ? Number(trophySaved) : computeTrophiesFromMinutes();
 }
 
 function saveStars() {
@@ -152,19 +163,35 @@ function saveOwnedItems() {
   localStorage.setItem("bearOwnedItems", JSON.stringify(ownedItems));
 }
 
+function saveTrophies() {
+  localStorage.setItem("bearTrophies", String(totalTrophies));
+}
+
+// 用目前各活動分鐘計算「應該有幾個小獎狀」
+function computeTrophiesFromMinutes() {
+  return (
+    Math.floor(studyMinutes / 60) +
+    Math.floor(sportMinutes / 60) +
+    Math.floor(funMinutes / 60) +
+    Math.floor(restMinutes / 60)
+  );
+}
+
 // --------- 綁定 UI ---------
 function bindUI() {
-  // 四個圓圈活動
+  // 四個圓圈活動按鈕
   document.querySelectorAll(".activity-circle").forEach((wrap) => {
     wrap.addEventListener("click", () => {
       const act = wrap.getAttribute("data-activity");
 
-      // 休息：按第二次回到上一個活動
+      // 休息：按第二次回到上一個活動（起床）
       if (act === "rest") {
         if (selectedActivity === "rest" && !timerIntervalId) {
           selectedActivity = lastNonRestActivity || "study";
         } else {
-          lastNonRestActivity = selectedActivity !== "rest" ? selectedActivity : lastNonRestActivity;
+          if (selectedActivity !== "rest") {
+            lastNonRestActivity = selectedActivity;
+          }
           selectedActivity = "rest";
         }
       } else {
@@ -172,6 +199,7 @@ function bindUI() {
         if (act !== "rest") lastNonRestActivity = act;
       }
 
+      // 圓圈選取狀態
       document.querySelectorAll(".activity-circle").forEach((c) => {
         c.classList.toggle(
           "active",
@@ -180,27 +208,28 @@ function bindUI() {
       });
 
       updateBearActivityUI();
+      updateCurrentActivityLabel();
     });
   });
 
-  // 初始把「學習」圈圈設為 active
+  // 預設學習為 active
   const firstCircle = document.querySelector('.activity-circle[data-activity="study"]');
   if (firstCircle) firstCircle.classList.add("active");
 
-  // 步進按鈕（按一下就直接加時間 + 設定步長）
+  // 步進按鈕：被點擊時，設定步長＋立即累加時間
   document.querySelectorAll(".step-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
-      const step = Number(btn.dataset.step || btn.getAttribute("data-step") || 1);
+      const step = Number(btn.dataset.step || 1);
+      stepMinutes = step;
 
       document.querySelectorAll(".step-btn").forEach((b) => {
         b.classList.remove("active");
       });
       btn.classList.add("active");
 
-      plannedMinutes = Math.min(600, plannedMinutes + step);
-      stepMinutes = step;
-
+      plannedMinutes = Math.min(600, plannedMinutes + stepMinutes);
       updateDurationDisplay();
+      updateTimerModeHint();
     });
   });
 
@@ -210,14 +239,16 @@ function bindUI() {
   minusBtn.addEventListener("click", () => {
     plannedMinutes = Math.max(0, plannedMinutes - stepMinutes);
     updateDurationDisplay();
+    updateTimerModeHint();
   });
   plusBtn.addEventListener("click", () => {
     plannedMinutes = Math.min(600, plannedMinutes + stepMinutes);
     updateDurationDisplay();
+    updateTimerModeHint();
   });
 
-  // Start / Cancel
-  document.getElementById("startButton").addEventListener("click", startTimer);
+  // Start / Cancel（包含碼錶 + 倒數）
+  document.getElementById("startButton").addEventListener("click", startButtonHandler);
   document.getElementById("cancelButton").addEventListener("click", cancelTimer);
 
   // 成長日記
@@ -235,9 +266,7 @@ function bindUI() {
   document
     .getElementById("closeAlarmModalBtn")
     .addEventListener("click", () => toggleModal("alarmModal", false));
-  document
-    .getElementById("addAlarmBtn")
-    .addEventListener("click", addAlarm);
+  document.getElementById("addAlarmBtn").addEventListener("click", addAlarm);
 
   // 作息
   document
@@ -281,12 +310,14 @@ function bindUI() {
       resetTimerUI();
     });
 
-  // 如果第一次使用，開名字 modal
+  // 首次進來要取名字
   if (!localStorage.getItem("bearNameEverSet")) {
     toggleModal("nameModal", true);
   }
 
   updateBearActivityUI();
+  updateCurrentActivityLabel();
+  updateTimerModeHint();
 }
 
 // --------- Render ---------
@@ -319,7 +350,12 @@ function renderStats() {
   const level = 1 + Math.floor(total / 180);
   document.getElementById("levelText").textContent = "Lv. " + level;
 
-  // 四個圓圈的分鐘＆圓環進度（1 小時一圈）
+  // 小獎狀數（由分鐘計算）
+  totalTrophies = computeTrophiesFromMinutes();
+  saveTrophies();
+  document.getElementById("trophyText").textContent = totalTrophies + " 個";
+
+  // 四個圓圈：分鐘＋外圈進度（1 小時一圈）
   setCircle("study", studyMinutes);
   setCircle("sport", sportMinutes);
   setCircle("fun", funMinutes);
@@ -333,7 +369,7 @@ function setCircle(key, minutes) {
   const circleOuter = document.getElementById(`circle-${key}`);
   if (!circleOuter) return;
 
-  const percent = (minutes % 60) / 60; // 1 小時一圈
+  const percent = (minutes % 60) / 60; // 一圈 60 分鐘
   const deg = percent * 360;
   circleOuter.style.setProperty("--progress", deg + "deg");
 }
@@ -372,7 +408,7 @@ function saveBearNameFromModal() {
   setBearBubble(`🐻 很高興跟你一起長大，我叫「${bearName}」！`);
 }
 
-// --------- Bear UI 根據活動 ---------
+// --------- Bear UI ---------
 function updateBearActivityUI() {
   const bearImg = document.getElementById("bearImage");
   const label = getActivityLabel(selectedActivity);
@@ -399,21 +435,64 @@ function updateBearActivityUI() {
   }
 }
 
-// --------- Timer ---------
-function startTimer() {
-  if (timerIntervalId) return;
-  if (plannedMinutes <= 0) {
-    alert("請先設定本次時間喔！");
+function updateCurrentActivityLabel() {
+  const label = getActivityLabel(selectedActivity);
+  const el = document.getElementById("currentActivityText");
+  if (!el) return;
+  el.textContent = `目前活動：${label}${
+    selectedActivity === "rest" ? "（按一次休息，再按一次起床）" : ""
+  }`;
+}
+
+// --------- Timer / 碼錶 ---------
+function startButtonHandler() {
+  // 若為碼錶模式正在跑：按下即「停止並結算」
+  if (currentTimerMode === "stopwatch" && timerIntervalId) {
+    finishStopwatch();
     return;
   }
 
+  // 若已有倒數計時在跑，不重複啟動
+  if (currentTimerMode === "countdown" && timerIntervalId) return;
+
+  // 決定模式
+  if (plannedMinutes <= 0) {
+    startStopwatchMode();
+  } else {
+    startCountdownMode();
+  }
+}
+
+function startStopwatchMode() {
+  currentTimerMode = "stopwatch";
+  stopwatchSeconds = 0;
+
+  document.getElementById("startButton").textContent = "停止";
+  document.getElementById("cancelButton").disabled = false;
+
+  updateTimerDisplayStopwatch();
+
+  if (selectedActivity === "rest") {
+    setBearBubble("🐻 休息開始了，讓身體跟心一起放鬆～");
+  } else {
+    setBearBubble("🐻 我跟你一起計時，看看這次會專心多久吧！");
+  }
+
+  timerIntervalId = setInterval(() => {
+    stopwatchSeconds++;
+    updateTimerDisplayStopwatch();
+  }, 1000);
+}
+
+function startCountdownMode() {
+  currentTimerMode = "countdown";
   timerTotalSeconds = plannedMinutes * 60;
   timerSecondsLeft = timerTotalSeconds;
 
   document.getElementById("startButton").disabled = true;
   document.getElementById("cancelButton").disabled = false;
 
-  updateTimerDisplay();
+  updateTimerDisplayCountdown();
 
   if (selectedActivity === "rest") {
     setBearBubble("🐻 好好休息，等一下再慢慢出發～");
@@ -426,9 +505,9 @@ function startTimer() {
     if (timerSecondsLeft <= 0) {
       clearInterval(timerIntervalId);
       timerIntervalId = null;
-      onTimerFinished();
+      onCountdownFinished();
     }
-    updateTimerDisplay();
+    updateTimerDisplayCountdown();
   }, 1000);
 }
 
@@ -439,20 +518,30 @@ function cancelTimer() {
   }
   clearInterval(timerIntervalId);
   timerIntervalId = null;
+
+  if (currentTimerMode === "stopwatch") {
+    setBearBubble("🐻 這次就先不記錄時間，有需要再重新開始也可以喔。");
+  } else if (currentTimerMode === "countdown") {
+    setBearBubble("🐻 這次先休息一下，之後再一起努力也可以。");
+  }
+
   resetTimerUI();
-  setBearBubble("🐻 這次先休息一下，之後再一起努力也可以。");
 }
 
 function resetTimerUI() {
+  currentTimerMode = "none";
   timerSecondsLeft = 0;
   timerTotalSeconds = 0;
+  stopwatchSeconds = 0;
   document.getElementById("timerDisplay").textContent = "尚未開始";
   document.getElementById("timerProgressFill").style.width = "0%";
   document.getElementById("startButton").disabled = false;
+  document.getElementById("startButton").textContent = "開始陪伴";
   document.getElementById("cancelButton").disabled = true;
+  updateTimerModeHint();
 }
 
-function updateTimerDisplay() {
+function updateTimerDisplayCountdown() {
   if (!timerTotalSeconds) return;
   const left = Math.max(0, timerSecondsLeft);
   const m = Math.floor(left / 60);
@@ -468,14 +557,46 @@ function updateTimerDisplay() {
     Math.min(100, percent) + "%";
 }
 
-function onTimerFinished() {
-  document.getElementById("startButton").disabled = false;
-  document.getElementById("cancelButton").disabled = true;
+function updateTimerDisplayStopwatch() {
+  const sec = stopwatchSeconds;
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  document.getElementById(
+    "timerDisplay"
+  ).textContent = `已經過 ${m.toString().padStart(2, "0")}:${s
+    .toString()
+    .padStart(2, "0")}`;
 
+  // 進度條：一小時一圈
+  const percent = Math.min(100, ((sec % 3600) / 3600) * 100);
+  document.getElementById("timerProgressFill").style.width =
+    Math.min(100, percent) + "%";
+}
+
+function onCountdownFinished() {
   const minutes = plannedMinutes;
-  const starsEarned = minutes; // 每分鐘 1 星
+  finishSessionCommon(minutes);
+}
 
-  // 更新成長數據
+function finishStopwatch() {
+  if (!timerIntervalId) return;
+  clearInterval(timerIntervalId);
+  timerIntervalId = null;
+
+  const minutes = Math.max(1, Math.round(stopwatchSeconds / 60)); // 至少算 1 分鐘
+  finishSessionCommon(minutes);
+}
+
+function finishSessionCommon(minutes) {
+  const activityLabel = getActivityLabel(selectedActivity);
+
+  // 結束後 UI 還原
+  resetTimerUI();
+
+  // ----- 記錄前的獎狀數 -----
+  const trophiesBefore = computeTrophiesFromMinutes();
+
+  // ----- 更新各活動累積時間 -----
   if (selectedActivity === "study") {
     studyMinutes += minutes;
   } else if (selectedActivity === "sport") {
@@ -486,10 +607,17 @@ function onTimerFinished() {
     restMinutes += minutes;
   }
   saveGrow();
+
+  // ----- 計算新的獎狀數 -----
+  const trophiesAfter = computeTrophiesFromMinutes();
+  const gainedTrophies = Math.max(0, trophiesAfter - trophiesBefore);
+  totalTrophies = trophiesAfter;
+  saveTrophies();
+
+  // 更新畫面
   renderStats();
 
-  // 寫日記
-  const label = getActivityLabel(selectedActivity);
+  // ----- 寫入日記 -----
   const now = new Date();
   const timeStr = `${now.getFullYear()}/${(now.getMonth() + 1)
     .toString()
@@ -506,13 +634,14 @@ function onTimerFinished() {
   diaryEntries.push({
     time: timeStr,
     activity: selectedActivity,
-    label,
+    label: activityLabel,
     minutes
   });
   saveDiary();
   renderDiaryList();
 
-  // 星星計算
+  // ----- 星星：每分鐘 1 顆 -----
+  const starsEarned = minutes;
   totalStars += starsEarned;
   saveStars();
 
@@ -533,20 +662,29 @@ function onTimerFinished() {
   const suggestion =
     suggestions[Math.floor(Math.random() * suggestions.length)];
 
+  // 完成任務 Modal
   const completionTextEl = document.getElementById("completionText");
   completionTextEl.innerHTML =
     "你完成了一段時間，熊麻吉覺得你超棒！<br>" + suggestion;
 
-  document.getElementById("completionActivityLabel").textContent = label;
+  document.getElementById("completionActivityLabel").textContent =
+    activityLabel;
   document.getElementById("completionMinutesLabel").textContent = minutes;
   document.getElementById("completionStarsLabel").textContent = starsEarned;
 
+  if (gainedTrophies > 0) {
+    const line = document.getElementById("completionTrophyLine");
+    const totalEl = document.getElementById("completionTrophyTotal");
+    line.style.display = "block";
+    totalEl.textContent = totalTrophies;
+  } else {
+    document.getElementById("completionTrophyLine").style.display = "none";
+  }
+
   toggleModal("completionModal", true);
 
-  // 下方星星結果 Toast
-  showStarToast(label, minutes, starsEarned);
-
-  // 星星飛到左上角
+  // 星星 Toast + 飛行動畫
+  showStarToast(activityLabel, minutes, starsEarned);
   starFlyToIcon(starsEarned);
 
   if (selectedActivity === "rest") {
@@ -562,6 +700,19 @@ function getActivityLabel(key) {
   if (key === "fun") return "娛樂";
   if (key === "rest") return "休息";
   return "活動";
+}
+
+// 顯示目前是「定時模式」還是「碼錶模式」
+function updateTimerModeHint() {
+  const tip = document.querySelector(".timer-tip");
+  if (!tip) return;
+  if (plannedMinutes <= 0) {
+    tip.innerHTML =
+      '若時間為 0 分鐘：進入 <strong>碼錶模式</strong>，按「開始」後會幫你記錄實際花多久時間，再按一次停止。';
+  } else {
+    tip.innerHTML =
+      "現在是 <strong>定時模式</strong>，時間到會自動幫你記錄這次的分鐘數。";
+  }
 }
 
 // --------- Bear Bubble ---------
