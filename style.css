@@ -60,7 +60,7 @@ body {
   border: 2px solid #f3c9b0;
   padding: 8px 10px 10px;
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
-  flex: 0 0 36%;
+  flex: 0 0 38%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -74,7 +74,7 @@ body {
   padding: 8px 10px;
   margin: 0;
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
-  flex: 0 0 22%;
+  flex: 0 0 25%;
   min-height: 0;
 }
 
@@ -105,8 +105,8 @@ body {
 }
 
 .bear-visual {
-  width: 120px;
-  height: 120px;
+  width: 150px;
+  height: 150px;
   margin: 0 auto 4px;
   border-radius: 50%;
   background: #ffe0ce;
@@ -117,8 +117,8 @@ body {
 }
 
 .bear-visual img {
-  max-width: 82%;
-  max-height: 82%;
+  max-width: 90%;
+  max-height: 90%;
   object-fit: contain;
 }
 
@@ -252,7 +252,7 @@ body {
 
 .stat-bar {
   flex: 1;
-  height: 6px;
+  height: 5px;
   border-radius: 999px;
   background: #ffe0dd;
   overflow: hidden;
