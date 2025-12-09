@@ -85,7 +85,24 @@ const shopItems = {
     { id: "fun2", name: "樂曲音樂盒", price: 7, img: "images/shop_fun2.png" }
   ]
 };
+// 假設 item.category 是類別： "main", "fruit", "dessert", "toy"... 等等
+function useBagItem(item) {
+  // 1. 原本的使用邏輯（扣數量、更新畫面 ...）
 
+  // 2. 依照種類調整好心情與飽足感
+  if (item.category === "main") {
+    changeSatiety(+40);
+    changeMood(+15);
+  } else if (item.category === "fruit") {
+    changeSatiety(+25);
+    changeMood(+10);
+  } else if (item.category === "dessert") {
+    changeSatiety(+20);
+    changeMood(+12);
+  } else if (item.category === "toy" || item.category === "entertain") {
+    changeMood(+18); // 娛樂用品不一定會吃，但能讓心情變好
+  }
+}
 document.addEventListener("DOMContentLoaded", () => {
   loadAllState();
   bindUI();
@@ -412,7 +429,39 @@ function renderDiaryList() {
       container.appendChild(div);
     });
 }
+function checkMoodByYesterday() {
+  const todayKey = getDateKey(0);
+  if (lastMoodCheckDate === todayKey) {
+    // 今天已經檢查過，不重複扣
+    return;
+  }
 
+  const yesterdayKey = getDateKey(-1);
+  const yesterdayMinutes = dailyMinutesMap[yesterdayKey] || 0;
+
+  if (yesterdayMinutes < dailyRequiredMinutes) {
+    // 昨天沒滿 5 分鐘 → 好心情下降一點
+    changeMood(-30); // 一次掉大約一階，你可以依照感覺調整
+  }
+
+  lastMoodCheckDate = todayKey;
+  localStorage.setItem("bear_lastMoodCheckDate", todayKey);
+}
+
+function initMoodAndSatiety() {
+  updateMoodUI();
+  updateSatietyUI();
+  checkMoodByYesterday();
+
+  // 飽足感：每 10 分鐘略微下降一點，休息也很重要
+  setInterval(() => {
+    changeSatiety(-2); // 100 → 0 大約 50 個 tick（~8.3 小時），可自行調整
+  }, 10 * 60 * 1000);
+}
+window.addEventListener("load", () => {
+  // 你原本的初始化程式...
+  initMoodAndSatiety();
+});
 // --------- 名字 ---------
 function saveBearNameFromModal() {
   const input = document.getElementById("bearNameInput");
@@ -609,7 +658,13 @@ function finishSessionCommon(minutes) {
 
   // 結束後 UI 還原
   resetTimerUI();
-
+function registerDailyMinutes(durationMinutes) {
+  const todayKey = getDateKey(0);
+  const prev = dailyMinutesMap[todayKey] || 0;
+  dailyMinutesMap[todayKey] = prev + durationMinutes;
+  localStorage.setItem("bear_dailyMinutes", JSON.stringify(dailyMinutesMap));
+}
+registerDailyMinutes(durationMinutes);
   // ----- 記錄前的獎狀數 -----
   const trophiesBefore = computeTrophiesFromMinutes();
 
@@ -745,7 +800,31 @@ function toggleModal(id, show) {
   if (show) el.classList.remove("hidden");
   else el.classList.add("hidden");
 }
+// ===== 好心情 & 飽足感 =====
+const MOOD_STAGE = {
+  TIRED: 0,   // 疲倦
+  CALM: 1,    // 平靜
+  HAPPY: 2    // 好心情
+};
 
+// 0–100 之間，決定條的長度；stage 用來決定熊熊說話
+let moodValue = parseInt(localStorage.getItem("bear_moodValue") || "50", 10);   // 預設平靜中間
+let moodStage = parseInt(localStorage.getItem("bear_moodStage") || "1", 10);    // 0/1/2
+let satietyValue = parseInt(localStorage.getItem("bear_satietyValue") || "80", 10); // 飽足感 80
+
+// 一天最低活動分鐘數（可以之後做成介面調整，先寫死 5）
+let dailyRequiredMinutes = parseInt(localStorage.getItem("bear_dailyRequiredMinutes") || "5", 10);
+
+// 用來判斷「昨天有沒有達標」
+let dailyMinutesMap = JSON.parse(localStorage.getItem("bear_dailyMinutes") || "{}");
+
+// 今天是否已經檢查過「昨天有沒有運動夠」
+let lastMoodCheckDate = localStorage.getItem("bear_lastMoodCheckDate") || "";
+
+const moodFillEl = document.getElementById("moodFill");
+const moodStageLabelEl = document.getElementById("moodStageLabel");
+const satietyFillEl = document.getElementById("satietyFill");
+const satietyLabelEl = document.getElementById("satietyLabel");
 // --------- 鬧鐘 ---------
 function addAlarm() {
   const activity = document.getElementById("alarmActivity").value;
@@ -1069,4 +1148,59 @@ function useItem(id) {
   renderOwnedItems();
   renderBagItems();
   setBearBubble(message);
+}
+function getDateKey(offsetDays = 0) {
+  const d = new Date();
+  d.setDate(d.getDate() + offsetDays);
+  return d.toISOString().slice(0, 10); // YYYY-MM-DD
+}
+function updateMoodUI() {
+  if (!moodFillEl || !moodStageLabelEl) return;
+
+  // moodValue 0–100 → 條長度
+  const safeValue = Math.max(0, Math.min(100, moodValue));
+  moodFillEl.style.width = safeValue + "%";
+
+  // 依照數值決定階段
+  if (safeValue < 34) {
+    moodStage = MOOD_STAGE.TIRED;
+    moodStageLabelEl.textContent = "疲倦";
+  } else if (safeValue < 67) {
+    moodStage = MOOD_STAGE.CALM;
+    moodStageLabelEl.textContent = "平靜";
+  } else {
+    moodStage = MOOD_STAGE.HAPPY;
+    moodStageLabelEl.textContent = "好心情";
+  }
+
+  localStorage.setItem("bear_moodValue", String(safeValue));
+  localStorage.setItem("bear_moodStage", String(moodStage));
+}
+
+function updateSatietyUI() {
+  if (!satietyFillEl || !satietyLabelEl) return;
+
+  const safeValue = Math.max(0, Math.min(100, satietyValue));
+  satietyFillEl.style.width = safeValue + "%";
+
+  if (safeValue < 25) {
+    satietyLabelEl.textContent = "超餓";
+  } else if (safeValue < 60) {
+    satietyLabelEl.textContent = "有點餓";
+  } else {
+    satietyLabelEl.textContent = "剛吃飽";
+  }
+
+  localStorage.setItem("bear_satietyValue", String(safeValue));
+}
+// delta 可以是正數（增加好心情）、負數（下降）
+function changeMood(delta) {
+  moodValue = Math.max(0, Math.min(100, moodValue + delta));
+  updateMoodUI();
+}
+
+// 吃東西／時間流逝用
+function changeSatiety(delta) {
+  satietyValue = Math.max(0, Math.min(100, satietyValue + delta));
+  updateSatietyUI();
 }
