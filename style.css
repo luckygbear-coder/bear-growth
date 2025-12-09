@@ -861,3 +861,13 @@ body {
   background: #ffb8c7;
   color: white;
 }
+.step-btn.reset-btn {
+  background: #ffe3e8;
+  border-color: #f3b4c1;
+  color: #c25d75;
+}
+
+.step-btn.reset-btn:active {
+  background: #ffb8c7;
+  color: white;
+}
