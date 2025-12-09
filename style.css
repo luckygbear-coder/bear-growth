@@ -844,3 +844,20 @@ body {
   border: 1px solid #f4d7af;
   margin-bottom: 4px;
 }
+.reset-btn {
+  margin-top: 3px;
+  border: none;
+  background: #ffe3e8;
+  color: #c26a7d;
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 11px;
+  cursor: pointer;
+  border: 1px solid #f2b7c3;
+  transition: 0.15s;
+}
+
+.reset-btn:active {
+  background: #ffb8c7;
+  color: white;
+}
