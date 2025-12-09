@@ -245,7 +245,7 @@ body {
 .level-small-row {
   font-size: 11px;
   color: #a37267;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 /* 四個圓圈 */
@@ -269,12 +269,13 @@ body {
   height: 64px;
   border-radius: 50%;
   padding: 3px;
-  background:
-    conic-gradient(#ff9fb7 var(--progress), #ffe5ee var(--progress) 360deg);
+  /* 有一圈淡粉底，進度條是較深的粉色 */
+  background: conic-gradient(#ff9fb7 var(--progress), #ffe0ec 0 360deg);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .activity-circle-inner {
@@ -302,6 +303,11 @@ body {
 .activity-circle.active .activity-circle-inner {
   background: #ffe3ef;
   box-shadow: 0 0 0 2px rgba(255, 160, 195, 0.8);
+}
+
+.activity-circle:active .activity-circle-outer {
+  transform: scale(0.97);
+  box-shadow: 0 0 0 2px rgba(255, 160, 195, 0.4);
 }
 
 .activity-minutes {
@@ -336,8 +342,22 @@ body {
   cursor: pointer;
 }
 
-.timer h3 {
+/* 目前活動提示 */
+.current-activity-label {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #8a4a60;
+}
+
+/* 小提示文字 */
+.timer-tip {
   margin: 4px 0 4px;
+  font-size: 11px;
+  color: #9a6a85;
+}
+
+.timer h3 {
+  margin: 4px 0 2px;
   font-size: 13px;
 }
 
