@@ -102,11 +102,15 @@
         <button class="ghost-btn" id="cancelButton" disabled>結束 / 取消</button>
       </div>
 
+      <!-- 📔 小日記大按鈕 -->
+      <div class="diary-actions">
+        <button id="openAllDiaryBtn" class="ghost-btn full-width">📔 小日記</button>
+      </div>
+
       <!-- 今日日記（預設展開，只顯示今天；可滑動） -->
       <div class="today-diary">
         <div class="today-diary-header">
           <span>📔 今日日記</span>
-          <button id="openAllDiaryBtn" class="link-like-btn">小日記</button>
         </div>
         <div id="todayDiaryList" class="today-diary-list">
           今天還沒有紀錄，完成一次活動就會出現囉～
@@ -156,7 +160,7 @@
     </footer>
   </div>
 
-  <!-- 🎉 完成任務鼓勵 Modal（B 版本：熊熊跳出來） -->
+  <!-- 🎉 完成任務鼓勵 Modal（熊熊跳出來） -->
   <div id="completionModal" class="modal hidden">
     <div class="modal-backdrop"></div>
     <div class="modal-card completion-card">
