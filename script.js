@@ -14,6 +14,7 @@ let totalStars = 0;
 let readingMinutes = 0;
 let sportMinutes = 0;
 let skillMinutes = 0;
+let sleepMinutes = 0; // 休息也算 EXP
 
 let diaryEntries = []; // { time, activity, label, minutes }
 
@@ -21,6 +22,9 @@ let alarms = []; // { id, activity, time, label }
 let scheduleSettings = {};
 
 let selectedActivity = "reading";
+let lastNonSleepActivity = "reading";
+let isSleepingMode = false; // 按了睡覺＝true，再按一次＝false
+
 let stepMinutes = 1;
 let plannedMinutes = 0;
 
@@ -83,6 +87,7 @@ function loadAllState() {
     readingMinutes = obj.reading || 0;
     sportMinutes = obj.sport || 0;
     skillMinutes = obj.skill || 0;
+    sleepMinutes = obj.sleep || 0;
   }
 
   const diarySaved = localStorage.getItem("bearDiary");
@@ -107,7 +112,8 @@ function saveGrow() {
   const obj = {
     reading: readingMinutes,
     sport: sportMinutes,
-    skill: skillMinutes
+    skill: skillMinutes,
+    sleep: sleepMinutes
   };
   localStorage.setItem("bearGrowMinutes", JSON.stringify(obj));
 }
@@ -130,14 +136,51 @@ function saveOwnedItems() {
 
 // --------- 綁定 UI ---------
 function bindUI() {
-  // 活動按鈕
+  // 活動按鈕（睡覺按一次睡，再按一次起床）
   document.querySelectorAll(".activity-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
-      document
-        .querySelectorAll(".activity-btn")
-        .forEach((b) => b.classList.remove("active"));
-      btn.classList.add("active");
-      selectedActivity = btn.getAttribute("data-activity");
+      const act = btn.getAttribute("data-activity");
+
+      if (act === "sleep") {
+        // 切換睡覺模式
+        if (!isSleepingMode) {
+          isSleepingMode = true;
+          if (selectedActivity !== "sleep") {
+            lastNonSleepActivity = selectedActivity;
+          }
+          selectedActivity = "sleep";
+
+          document
+            .querySelectorAll(".activity-btn")
+            .forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+        } else {
+          // 起床：回到之前的活動
+          isSleepingMode = false;
+          selectedActivity = lastNonSleepActivity || "reading";
+          document
+            .querySelectorAll(".activity-btn")
+            .forEach((b) => {
+              b.classList.toggle(
+                "active",
+                b.getAttribute("data-activity") === selectedActivity
+              );
+            });
+        }
+      } else {
+        isSleepingMode = false;
+        lastNonSleepActivity = act;
+        selectedActivity = act;
+        document
+          .querySelectorAll(".activity-btn")
+          .forEach((b) => {
+            b.classList.toggle(
+              "active",
+              b.getAttribute("data-activity") === act
+            );
+          });
+      }
+
       updateBearActivityUI();
     });
   });
@@ -265,19 +308,23 @@ function updateDurationDisplay() {
 }
 
 function renderStats() {
-  const total = readingMinutes + sportMinutes + skillMinutes;
+  const total =
+    readingMinutes + sportMinutes + skillMinutes + sleepMinutes;
   const maxBase = Math.max(30, total);
 
   setBar("readingBar", readingMinutes, maxBase);
   setBar("sportBar", sportMinutes, maxBase);
   setBar("skillBar", skillMinutes, maxBase);
+  setBar("sleepBar", sleepMinutes, maxBase);
 
   document.getElementById("readingValue").textContent =
     readingMinutes + " 分鐘";
   document.getElementById("sportValue").textContent = sportMinutes + " 分鐘";
   document.getElementById("skillValue").textContent = skillMinutes + " 分鐘";
+  document.getElementById("sleepValue").textContent = sleepMinutes + " 分鐘";
 
-  const level = 1 + Math.floor(total / 60);
+  // 每累積 3 小時（180 分鐘）升 1 級
+  const level = 1 + Math.floor(total / 180);
   document.getElementById("levelText").textContent = "Lv. " + level;
 }
 
@@ -328,11 +375,13 @@ function updateBearActivityUI() {
 
   if (selectedActivity === "sleep") {
     if (bearImg) bearImg.src = bearImages.sleep || bearImages.idle;
-    setBearBubble("🐻 我有點想睡覺了…呼～呼～😴");
-    document.getElementById("timerDisplay").textContent = "睡覺中，不需計時。";
-    document.getElementById("timerProgressFill").style.width = "0%";
-    document.getElementById("startButton").disabled = true;
-    document.getElementById("cancelButton").disabled = true;
+    setBearBubble("🐻 今天好像有點累，我們一起好好休息一下吧～");
+    if (!timerIntervalId && !plannedMinutes) {
+      document.getElementById("timerDisplay").textContent =
+        "準備休息時間，設定一下要睡多久吧～";
+      document.getElementById("timerProgressFill").style.width = "0%";
+    }
+    // 睡覺也可以計時＆拿星星，所以不鎖按鈕
     return;
   }
 
@@ -343,26 +392,22 @@ function updateBearActivityUI() {
   }
   setBearBubble(`🐻 今天要一起「${label}」嗎？`);
 
-  // 恢復按鈕狀態（如果沒有在計時）
+  // 若沒有在計時時，恢復按鈕狀態
   if (!timerIntervalId) {
     document.getElementById("startButton").disabled = false;
     document.getElementById("cancelButton").disabled = true;
     if (!plannedMinutes) {
       document.getElementById("timerDisplay").textContent = "尚未開始";
+      document.getElementById("timerProgressFill").style.width = "0%";
     }
   }
 }
 
 // --------- Timer ---------
 function startTimer() {
-  if (selectedActivity === "sleep") {
-    alert("睡覺不用計時，只要好好休息就好～😴");
-    return;
-  }
-
   if (timerIntervalId) return;
   if (plannedMinutes <= 0) {
-    alert("請先設定本次專注時間喔！");
+    alert("請先設定本次專注／休息時間喔！");
     return;
   }
 
@@ -373,7 +418,11 @@ function startTimer() {
   document.getElementById("cancelButton").disabled = false;
 
   updateTimerDisplay();
-  setBearBubble("🐻 我跟你一起專心，加油加油～");
+  if (selectedActivity === "sleep") {
+    setBearBubble("🐻 好好睡一覺，休息也是很棒的練習。");
+  } else {
+    setBearBubble("🐻 我跟你一起專心，加油加油～");
+  }
 
   timerIntervalId = setInterval(() => {
     timerSecondsLeft--;
@@ -429,13 +478,15 @@ function onTimerFinished() {
   const minutes = plannedMinutes;
   const starsEarned = minutes; // 每分鐘 1 星
 
-  // 更新成長數據
+  // 更新成長數據（包含休息）
   if (selectedActivity === "reading") {
     readingMinutes += minutes;
   } else if (selectedActivity === "sport") {
     sportMinutes += minutes;
   } else if (selectedActivity === "skill") {
     skillMinutes += minutes;
+  } else if (selectedActivity === "sleep") {
+    sleepMinutes += minutes;
   }
   saveGrow();
   renderStats();
@@ -468,12 +519,30 @@ function onTimerFinished() {
   totalStars += starsEarned;
   saveStars();
 
-  // 恭喜文字
+  // 建議句子
+  let suggestions;
+  if (selectedActivity === "sleep") {
+    suggestions = [
+      "如果覺得精神好多了，可以起來伸伸懶腰、活動一下身體～",
+      "休息很重要，之後再選一個想做的活動慢慢來。"
+    ];
+  } else {
+    suggestions = [
+      "要不要換個活動，讓身體或大腦休息一下？",
+      "可以站起來喝口水、伸展一下再繼續～",
+      "這次很棒，之後也可以改成另一種活動，讓今天更均衡！"
+    ];
+  }
+  const suggestion =
+    suggestions[Math.floor(Math.random() * suggestions.length)];
+
+  const completionTextEl = document.getElementById("completionText");
+  completionTextEl.innerHTML =
+    "你完成了一段專注時間，熊麻吉覺得你超棒！<br>" + suggestion;
+
   document.getElementById("completionActivityLabel").textContent = label;
   document.getElementById("completionMinutesLabel").textContent = minutes;
   document.getElementById("completionStarsLabel").textContent = starsEarned;
-  document.getElementById("completionText").textContent =
-    "你完成了一段專注時間，熊麻吉覺得你超棒！";
 
   toggleModal("completionModal", true);
 
@@ -483,14 +552,18 @@ function onTimerFinished() {
   // 星星飛到左上角
   starFlyToIcon(starsEarned);
 
-  setBearBubble("🐻 完成了！我們又一起前進了一小步～");
+  if (selectedActivity === "sleep") {
+    setBearBubble("🐻 休息完了，等等可以選一個想做的活動慢慢開始～");
+  } else {
+    setBearBubble("🐻 完成了！我們又一起前進了一小步～");
+  }
 }
 
 function getActivityLabel(key) {
   if (key === "reading") return "看書";
   if (key === "sport") return "運動";
   if (key === "skill") return "練技能";
-  if (key === "sleep") return "睡覺";
+  if (key === "sleep") return "睡覺 / 休息";
   return "活動";
 }
 
