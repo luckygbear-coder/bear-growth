@@ -179,6 +179,14 @@ function computeTrophiesFromMinutes() {
 
 // --------- 綁定 UI ---------
 function bindUI() {
+  // 歸零按鈕（放在 step-buttons 裡）
+const resetStepBtn = document.getElementById("resetBtn");
+resetStepBtn.addEventListener("click", () => {
+  plannedMinutes = 0;
+  updateDurationDisplay();
+  updateTimerModeHint();
+  setBearBubble("🐻 時間已經幫你歸零囉！");
+});
   // 四個圓圈活動按鈕
   document.querySelectorAll(".activity-circle").forEach((wrap) => {
     wrap.addEventListener("click", () => {
