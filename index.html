@@ -16,7 +16,7 @@
     <!-- 🐻 熊熊區塊 -->
     <section class="bear-panel">
       <div class="bear-visual mode-idle" id="bearVisual">
-        <!-- 這個 src 只是預設，真正載入時會被 script.js 覆蓋成閒置熊三選一 -->
+        <!-- 載入後會被 script.js 改成閒置熊三選一 -->
         <img id="bearImage" src="images/bear_idle1.png" alt="成長熊" />
       </div>
       <div class="bear-bubble" id="bearBubble">
@@ -57,7 +57,7 @@
       </div>
     </section>
 
-    <!-- ⏳ 任務／定時／小日記／鬧鐘 -->
+    <!-- ⏳ 任務／定時／今日日記／鬧鐘 -->
     <section class="timer">
       <h2>今天要做什麼？</h2>
 
@@ -102,14 +102,14 @@
         <button class="ghost-btn" id="cancelButton" disabled>結束 / 取消</button>
       </div>
 
-      <div class="diary-actions">
-        <button class="ghost-btn" id="diaryButton">📔 小日記</button>
-      </div>
-
-      <div id="diaryPanel" class="diary-panel" style="display:none;">
-        <h3>成長熊的小日記</h3>
-        <div id="diaryList" class="diary-list">
-          目前還沒有紀錄，完成一次活動就會出現囉～
+      <!-- 今日日記（預設展開，只顯示今天；可滑動） -->
+      <div class="today-diary">
+        <div class="today-diary-header">
+          <span>📔 今日日記</span>
+          <button id="openAllDiaryBtn" class="link-like-btn">小日記</button>
+        </div>
+        <div id="todayDiaryList" class="today-diary-list">
+          今天還沒有紀錄，完成一次活動就會出現囉～
         </div>
       </div>
 
@@ -117,7 +117,7 @@
 
       <!-- 🔔 鬧鐘排程區 -->
       <div class="alarm-block">
-        <h3>鬧鐘提醒 — 安排什麼時候要做什麼</h3>
+        <h3>鬧鐘提醒</h3>
 
         <div class="alarm-form">
           <div class="alarm-row">
@@ -140,7 +140,7 @@
           </div>
 
           <button id="addAlarmBtn" class="primary-btn small-btn">新增鬧鐘</button>
-          <p class="alarm-tip">＊提示：網頁必須開著，鬧鐘才會提醒喔。</p>
+          <p class="alarm-tip">＊網頁必須開著，鬧鐘才會提醒喔。</p>
         </div>
 
         <div class="alarm-list" id="alarmList">
@@ -154,6 +154,36 @@
         ⬅ 返回冒險者天堂首頁
       </button>
     </footer>
+  </div>
+
+  <!-- 🎉 完成任務鼓勵 Modal（B 版本：熊熊跳出來） -->
+  <div id="completionModal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-card completion-card">
+      <div class="completion-bear">🐻✨</div>
+      <h3 id="completionTitle">太棒了！</h3>
+      <p id="completionText">
+        你完成了 20 分鐘的閱讀，今天的你又升級了一點點！
+      </p>
+      <div class="modal-actions">
+        <button id="modalAgainBtn" class="primary-btn full-width">再來一輪</button>
+        <button id="modalRestBtn" class="ghost-btn full-width">先休息一下</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 📘 全部日記 Modal -->
+  <div id="allDiaryModal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-card diary-card">
+      <div class="modal-header-row">
+        <h3>成長熊的小日記</h3>
+        <button id="closeAllDiaryBtn" class="icon-btn">✕</button>
+      </div>
+      <div id="allDiaryList" class="diary-list all-diary-list">
+        目前還沒有任何紀錄。
+      </div>
+    </div>
   </div>
 
   <script src="script.js"></script>
