@@ -246,6 +246,13 @@ function bindUI() {
     updateDurationDisplay();
     updateTimerModeHint();
   });
+  // 歸零按鈕
+document.getElementById("resetBtn").addEventListener("click", () => {
+  plannedMinutes = 0;
+  updateDurationDisplay();
+  updateTimerModeHint();
+  setBearBubble("🐻 時間已經幫你歸零囉！");
+});
 
   // Start / Cancel（包含碼錶 + 倒數）
   document.getElementById("startButton").addEventListener("click", startButtonHandler);
