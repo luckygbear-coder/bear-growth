@@ -1,29 +1,39 @@
 // --------- 熊熊圖片對應 ---------
 const bearImages = {
   idle: "images/bear_idle1.png",
-  reading: "images/bear_reading.png",
+  study: "images/bear_reading.png", // 學習
   sport: "images/bear_sport.png",
-  skill: "images/bear_skill.png",
-  sleep: "images/bear_sleep.png"
+  fun: "images/bear_skill.png",     // 娛樂可共用技能熊圖
+  rest: "images/bear_sleep.png"
+};
+
+// --------- 預設作息 ---------
+const defaultSchedule = {
+  sleepStartInput: "21:30",
+  sleepEndInput: "06:30",
+  hungryMorningInput: "07:00",
+  hungryNoonInput: "12:00",
+  napStartInput: "12:30",
+  napDurationInput: "60",
+  hungryEveningInput: "18:00"
 };
 
 // --------- 全域狀態 ---------
 let bearName = "熊麻吉";
 let totalStars = 0;
 
-let readingMinutes = 0;
+let studyMinutes = 0;
 let sportMinutes = 0;
-let skillMinutes = 0;
-let sleepMinutes = 0; // 休息也算 EXP
+let funMinutes = 0;
+let restMinutes = 0;
 
 let diaryEntries = []; // { time, activity, label, minutes }
 
 let alarms = []; // { id, activity, time, label }
 let scheduleSettings = {};
 
-let selectedActivity = "reading";
-let lastNonSleepActivity = "reading";
-let isSleepingMode = false; // 按了睡覺＝true，再按一次＝false
+let selectedActivity = "study";
+let lastNonRestActivity = "study";
 
 let stepMinutes = 1;
 let plannedMinutes = 0;
@@ -84,10 +94,10 @@ function loadAllState() {
   const growSaved = localStorage.getItem("bearGrowMinutes");
   if (growSaved) {
     const obj = JSON.parse(growSaved);
-    readingMinutes = obj.reading || 0;
+    studyMinutes = obj.study || 0;
     sportMinutes = obj.sport || 0;
-    skillMinutes = obj.skill || 0;
-    sleepMinutes = obj.sleep || 0;
+    funMinutes = obj.fun || 0;
+    restMinutes = obj.rest || 0;
   }
 
   const diarySaved = localStorage.getItem("bearDiary");
@@ -97,7 +107,15 @@ function loadAllState() {
   alarms = alarmsSaved ? JSON.parse(alarmsSaved) : [];
 
   const scheduleSaved = localStorage.getItem("bearSchedule");
-  scheduleSettings = scheduleSaved ? JSON.parse(scheduleSaved) : {};
+  if (scheduleSaved) {
+    scheduleSettings = JSON.parse(scheduleSaved);
+    // 把沒有的欄位補上預設值
+    Object.keys(defaultSchedule).forEach((k) => {
+      if (!scheduleSettings[k]) scheduleSettings[k] = defaultSchedule[k];
+    });
+  } else {
+    scheduleSettings = { ...defaultSchedule };
+  }
 
   const ownedSaved = localStorage.getItem("bearOwnedItems");
   ownedItems = ownedSaved ? JSON.parse(ownedSaved) : {};
@@ -110,10 +128,10 @@ function saveStars() {
 
 function saveGrow() {
   const obj = {
-    reading: readingMinutes,
+    study: studyMinutes,
     sport: sportMinutes,
-    skill: skillMinutes,
-    sleep: sleepMinutes
+    fun: funMinutes,
+    rest: restMinutes
   };
   localStorage.setItem("bearGrowMinutes", JSON.stringify(obj));
 }
@@ -136,54 +154,38 @@ function saveOwnedItems() {
 
 // --------- 綁定 UI ---------
 function bindUI() {
-  // 活動按鈕（睡覺按一次睡，再按一次起床）
-  document.querySelectorAll(".activity-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const act = btn.getAttribute("data-activity");
+  // 四個圓圈活動
+  document.querySelectorAll(".activity-circle").forEach((wrap) => {
+    wrap.addEventListener("click", () => {
+      const act = wrap.getAttribute("data-activity");
 
-      if (act === "sleep") {
-        // 切換睡覺模式
-        if (!isSleepingMode) {
-          isSleepingMode = true;
-          if (selectedActivity !== "sleep") {
-            lastNonSleepActivity = selectedActivity;
-          }
-          selectedActivity = "sleep";
-
-          document
-            .querySelectorAll(".activity-btn")
-            .forEach((b) => b.classList.remove("active"));
-          btn.classList.add("active");
+      // 休息：按第二次回到上一個活動
+      if (act === "rest") {
+        if (selectedActivity === "rest" && !timerIntervalId) {
+          selectedActivity = lastNonRestActivity || "study";
         } else {
-          // 起床：回到之前的活動
-          isSleepingMode = false;
-          selectedActivity = lastNonSleepActivity || "reading";
-          document
-            .querySelectorAll(".activity-btn")
-            .forEach((b) => {
-              b.classList.toggle(
-                "active",
-                b.getAttribute("data-activity") === selectedActivity
-              );
-            });
+          lastNonRestActivity = selectedActivity !== "rest" ? selectedActivity : lastNonRestActivity;
+          selectedActivity = "rest";
         }
       } else {
-        isSleepingMode = false;
-        lastNonSleepActivity = act;
         selectedActivity = act;
-        document
-          .querySelectorAll(".activity-btn")
-          .forEach((b) => {
-            b.classList.toggle(
-              "active",
-              b.getAttribute("data-activity") === act
-            );
-          });
+        if (act !== "rest") lastNonRestActivity = act;
       }
+
+      document.querySelectorAll(".activity-circle").forEach((c) => {
+        c.classList.toggle(
+          "active",
+          c.getAttribute("data-activity") === selectedActivity
+        );
+      });
 
       updateBearActivityUI();
     });
   });
+
+  // 初始把「學習」圈圈設為 active
+  const firstCircle = document.querySelector('.activity-circle[data-activity="study"]');
+  if (firstCircle) firstCircle.classList.add("active");
 
   // 步進按鈕（按一下就直接加時間 + 設定步長）
   document.querySelectorAll(".step-btn").forEach((btn) => {
@@ -284,7 +286,6 @@ function bindUI() {
     toggleModal("nameModal", true);
   }
 
-  // 初始化活動 UI（預設看書）
   updateBearActivityUI();
 }
 
@@ -309,30 +310,32 @@ function updateDurationDisplay() {
 
 function renderStats() {
   const total =
-    readingMinutes + sportMinutes + skillMinutes + sleepMinutes;
-  const maxBase = Math.max(30, total);
+    studyMinutes + sportMinutes + funMinutes + restMinutes;
 
-  setBar("readingBar", readingMinutes, maxBase);
-  setBar("sportBar", sportMinutes, maxBase);
-  setBar("skillBar", skillMinutes, maxBase);
-  setBar("sleepBar", sleepMinutes, maxBase);
-
-  document.getElementById("readingValue").textContent =
-    readingMinutes + " 分鐘";
-  document.getElementById("sportValue").textContent = sportMinutes + " 分鐘";
-  document.getElementById("skillValue").textContent = skillMinutes + " 分鐘";
-  document.getElementById("sleepValue").textContent = sleepMinutes + " 分鐘";
+  document.getElementById("totalMinutesText").textContent =
+    total + " 分鐘";
 
   // 每累積 3 小時（180 分鐘）升 1 級
   const level = 1 + Math.floor(total / 180);
   document.getElementById("levelText").textContent = "Lv. " + level;
+
+  // 四個圓圈的分鐘＆圓環進度（1 小時一圈）
+  setCircle("study", studyMinutes);
+  setCircle("sport", sportMinutes);
+  setCircle("fun", funMinutes);
+  setCircle("rest", restMinutes);
 }
 
-function setBar(id, value, max) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  const percent = max <= 0 ? 0 : Math.min(100, (value / max) * 100);
-  el.style.width = percent + "%";
+function setCircle(key, minutes) {
+  const minutesEl = document.getElementById(`minutes-${key}`);
+  if (minutesEl) minutesEl.textContent = minutes + " 分鐘";
+
+  const circleOuter = document.getElementById(`circle-${key}`);
+  if (!circleOuter) return;
+
+  const percent = (minutes % 60) / 60; // 1 小時一圈
+  const deg = percent * 360;
+  circleOuter.style.setProperty("--progress", deg + "deg");
 }
 
 function renderDiaryList() {
@@ -351,7 +354,7 @@ function renderDiaryList() {
       div.innerHTML = `
         <div>${entry.time}</div>
         <div>活動：${entry.label}</div>
-        <div>專注 ${entry.minutes} 分鐘</div>
+        <div>${entry.minutes} 分鐘</div>
       `;
       container.appendChild(div);
     });
@@ -372,34 +375,27 @@ function saveBearNameFromModal() {
 // --------- Bear UI 根據活動 ---------
 function updateBearActivityUI() {
   const bearImg = document.getElementById("bearImage");
-
-  if (selectedActivity === "sleep") {
-    if (bearImg) bearImg.src = bearImages.sleep || bearImages.idle;
-    setBearBubble("🐻 今天好像有點累，我們一起好好休息一下吧～");
-    if (!timerIntervalId && !plannedMinutes) {
-      document.getElementById("timerDisplay").textContent =
-        "準備休息時間，設定一下要睡多久吧～";
-      document.getElementById("timerProgressFill").style.width = "0%";
-    }
-    // 睡覺也可以計時＆拿星星，所以不鎖按鈕
-    return;
-  }
-
-  // 其他活動
   const label = getActivityLabel(selectedActivity);
+
   if (bearImg) {
     bearImg.src = bearImages[selectedActivity] || bearImages.idle;
   }
-  setBearBubble(`🐻 今天要一起「${label}」嗎？`);
 
-  // 若沒有在計時時，恢復按鈕狀態
-  if (!timerIntervalId) {
-    document.getElementById("startButton").disabled = false;
-    document.getElementById("cancelButton").disabled = true;
-    if (!plannedMinutes) {
-      document.getElementById("timerDisplay").textContent = "尚未開始";
-      document.getElementById("timerProgressFill").style.width = "0%";
-    }
+  if (selectedActivity === "rest") {
+    setBearBubble("🐻 休息也是很重要的練習，我們一起好好放鬆一下～");
+  } else if (selectedActivity === "study") {
+    setBearBubble("🐻 來一點溫柔的專心時間，一起慢慢學習吧～");
+  } else if (selectedActivity === "sport") {
+    setBearBubble("🐻 動一動身體，讓自己更有精神！");
+  } else if (selectedActivity === "fun") {
+    setBearBubble("🐻 也要記得玩耍放鬆，心情才會亮晶晶～");
+  } else {
+    setBearBubble(`🐻 今天要一起「${label}」嗎？`);
+  }
+
+  if (!timerIntervalId && !plannedMinutes) {
+    document.getElementById("timerDisplay").textContent = "尚未開始";
+    document.getElementById("timerProgressFill").style.width = "0%";
   }
 }
 
@@ -407,7 +403,7 @@ function updateBearActivityUI() {
 function startTimer() {
   if (timerIntervalId) return;
   if (plannedMinutes <= 0) {
-    alert("請先設定本次專注／休息時間喔！");
+    alert("請先設定本次時間喔！");
     return;
   }
 
@@ -418,8 +414,9 @@ function startTimer() {
   document.getElementById("cancelButton").disabled = false;
 
   updateTimerDisplay();
-  if (selectedActivity === "sleep") {
-    setBearBubble("🐻 好好睡一覺，休息也是很棒的練習。");
+
+  if (selectedActivity === "rest") {
+    setBearBubble("🐻 好好休息，等一下再慢慢出發～");
   } else {
     setBearBubble("🐻 我跟你一起專心，加油加油～");
   }
@@ -478,15 +475,15 @@ function onTimerFinished() {
   const minutes = plannedMinutes;
   const starsEarned = minutes; // 每分鐘 1 星
 
-  // 更新成長數據（包含休息）
-  if (selectedActivity === "reading") {
-    readingMinutes += minutes;
+  // 更新成長數據
+  if (selectedActivity === "study") {
+    studyMinutes += minutes;
   } else if (selectedActivity === "sport") {
     sportMinutes += minutes;
-  } else if (selectedActivity === "skill") {
-    skillMinutes += minutes;
-  } else if (selectedActivity === "sleep") {
-    sleepMinutes += minutes;
+  } else if (selectedActivity === "fun") {
+    funMinutes += minutes;
+  } else if (selectedActivity === "rest") {
+    restMinutes += minutes;
   }
   saveGrow();
   renderStats();
@@ -521,16 +518,16 @@ function onTimerFinished() {
 
   // 建議句子
   let suggestions;
-  if (selectedActivity === "sleep") {
+  if (selectedActivity === "rest") {
     suggestions = [
       "如果覺得精神好多了，可以起來伸伸懶腰、活動一下身體～",
-      "休息很重要，之後再選一個想做的活動慢慢來。"
+      "休息完可以挑一個想做的活動，慢慢開始就好。"
     ];
   } else {
     suggestions = [
       "要不要換個活動，讓身體或大腦休息一下？",
       "可以站起來喝口水、伸展一下再繼續～",
-      "這次很棒，之後也可以改成另一種活動，讓今天更均衡！"
+      "這次很棒，等等也可以改成其他活動，讓今天更均衡！"
     ];
   }
   const suggestion =
@@ -538,7 +535,7 @@ function onTimerFinished() {
 
   const completionTextEl = document.getElementById("completionText");
   completionTextEl.innerHTML =
-    "你完成了一段專注時間，熊麻吉覺得你超棒！<br>" + suggestion;
+    "你完成了一段時間，熊麻吉覺得你超棒！<br>" + suggestion;
 
   document.getElementById("completionActivityLabel").textContent = label;
   document.getElementById("completionMinutesLabel").textContent = minutes;
@@ -552,7 +549,7 @@ function onTimerFinished() {
   // 星星飛到左上角
   starFlyToIcon(starsEarned);
 
-  if (selectedActivity === "sleep") {
+  if (selectedActivity === "rest") {
     setBearBubble("🐻 休息完了，等等可以選一個想做的活動慢慢開始～");
   } else {
     setBearBubble("🐻 完成了！我們又一起前進了一小步～");
@@ -560,10 +557,10 @@ function onTimerFinished() {
 }
 
 function getActivityLabel(key) {
-  if (key === "reading") return "看書";
+  if (key === "study") return "學習";
   if (key === "sport") return "運動";
-  if (key === "skill") return "練技能";
-  if (key === "sleep") return "睡覺 / 休息";
+  if (key === "fun") return "娛樂";
+  if (key === "rest") return "休息";
   return "活動";
 }
 
@@ -648,36 +645,18 @@ function checkAlarms() {
 
 // --------- 作息 ---------
 function fillScheduleInputs() {
-  const keys = [
-    "sleepStartInput",
-    "sleepEndInput",
-    "hungryMorningInput",
-    "hungryNoonInput",
-    "napStartInput",
-    "napDurationInput",
-    "hungryEveningInput"
-  ];
-  keys.forEach((id) => {
+  Object.keys(defaultSchedule).forEach((id) => {
     const el = document.getElementById(id);
     if (!el) return;
-    el.value = scheduleSettings[id] || "";
+    el.value = scheduleSettings[id] || defaultSchedule[id];
   });
 }
 
 function saveScheduleFromInputs() {
-  const keys = [
-    "sleepStartInput",
-    "sleepEndInput",
-    "hungryMorningInput",
-    "hungryNoonInput",
-    "napStartInput",
-    "napDurationInput",
-    "hungryEveningInput"
-  ];
-  keys.forEach((id) => {
+  Object.keys(defaultSchedule).forEach((id) => {
     const el = document.getElementById(id);
     if (!el) return;
-    scheduleSettings[id] = el.value;
+    scheduleSettings[id] = el.value || defaultSchedule[id];
   });
   saveSchedule();
   toggleModal("scheduleModal", false);
