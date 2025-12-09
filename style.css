@@ -402,31 +402,7 @@ section {
   cursor: default;
 }
 
-/* 今日日記 */
-.today-diary {
-  margin-top: 6px;
-  background: #fffaf0;
-  border-radius: 12px;
-  border: 1px dashed #f1c3a7;
-  padding: 6px 8px;
-  flex: 0 0 auto;
-}
 
-.today-diary-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 12px;
-  margin-bottom: 4px;
-  color: #85415b;
-}
-
-.today-diary-list {
-  max-height: 70px;
-  overflow-y: auto;
-  font-size: 11px;
-  color: #7a4a5b;
-}
 
 /* 鬧鐘區塊 */
 .soft-hr {
