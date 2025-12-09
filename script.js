@@ -2,9 +2,9 @@
 const bearImages = {
   idle: "images/bear_idle1.png",
   study: "images/bear_reading.png", // 學習
-  sport: "images/bear_sport.png",
-  fun: "images/bear_skill.png",     // 娛樂可共用技能熊圖
-  rest: "images/bear_sleep.png"
+  sport: "images/bear_sport.png",   // 運動
+  fun: "images/bear_skill.png",     // 娛樂可先共用技能熊
+  rest: "images/bear_sleep.png"     // 休息
 };
 
 // --------- 預設作息 ---------
@@ -28,22 +28,27 @@ let sportMinutes = 0;
 let funMinutes = 0;
 let restMinutes = 0;
 
-// 小獎狀（依四個活動累積 60 分鐘一圈計算）
+// 小獎狀
 let totalTrophies = 0;
 
+// 日記
 let diaryEntries = []; // { time, activity, label, minutes }
 
+// 鬧鐘
 let alarms = []; // { id, activity, time, label, lastTriggeredDate }
+
+// 作息設定
 let scheduleSettings = {};
 
+// 擁有物品（商店 + 背包共用）
 let ownedItems = {}; // { id: { name, category, categoryName, count } }
 
 // 目前活動：study / sport / fun / rest
 let selectedActivity = "study";
 let lastNonRestActivity = "study";
 
-// 時間步長與設定時間
-let stepMinutes = 1;
+// 時間設定
+let stepMinutes = 5;   // 預設 5 分
 let plannedMinutes = 0;
 
 // Timer 狀態
@@ -68,7 +73,7 @@ const shopItems = {
     { id: "dessert2", name: "生日蛋糕塔", price: 6, img: "images/shop_dessert2.png" }
   ],
   furniture: [
-    { id: "f1", name: "小木床", price: 10, img: "images/shop_furniture1.png" },
+    { id: "f1", name: "溫暖小木床", price: 10, img: "images/shop_furniture1.png" },
     { id: "f2", name: "故事書書櫃", price: 12, img: "images/shop_furniture2.png" }
   ],
   study: [
@@ -86,6 +91,7 @@ document.addEventListener("DOMContentLoaded", () => {
   bindUI();
   renderAll();
   renderOwnedItems();
+  renderBagItems();
   renderAlarms();
 
   // 每 30 秒檢查鬧鐘
@@ -179,27 +185,17 @@ function computeTrophiesFromMinutes() {
 
 // --------- 綁定 UI ---------
 function bindUI() {
-  // 歸零按鈕（放在 step-buttons 裡）
-const resetStepBtn = document.getElementById("resetBtn");
-resetStepBtn.addEventListener("click", () => {
-  plannedMinutes = 0;
-  updateDurationDisplay();
-  updateTimerModeHint();
-  setBearBubble("🐻 時間已經幫你歸零囉！");
-});
-  // 四個圓圈活動按鈕
+  // 四個圓圈活動
   document.querySelectorAll(".activity-circle").forEach((wrap) => {
     wrap.addEventListener("click", () => {
       const act = wrap.getAttribute("data-activity");
 
-      // 休息：按第二次回到上一個活動（起床）
+      // 休息：按第二次、沒有計時時 → 回到上一個活動（起床）
       if (act === "rest") {
         if (selectedActivity === "rest" && !timerIntervalId) {
           selectedActivity = lastNonRestActivity || "study";
         } else {
-          if (selectedActivity !== "rest") {
-            lastNonRestActivity = selectedActivity;
-          }
+          if (selectedActivity !== "rest") lastNonRestActivity = selectedActivity;
           selectedActivity = "rest";
         }
       } else {
@@ -207,7 +203,6 @@ resetStepBtn.addEventListener("click", () => {
         if (act !== "rest") lastNonRestActivity = act;
       }
 
-      // 圓圈選取狀態
       document.querySelectorAll(".activity-circle").forEach((c) => {
         c.classList.toggle(
           "active",
@@ -224,13 +219,16 @@ resetStepBtn.addEventListener("click", () => {
   const firstCircle = document.querySelector('.activity-circle[data-activity="study"]');
   if (firstCircle) firstCircle.classList.add("active");
 
-  // 步進按鈕：被點擊時，設定步長＋立即累加時間
+  // 步進按鈕：5 / 10 / 30 / 60 分
   document.querySelectorAll(".step-btn").forEach((btn) => {
+    if (btn.id === "resetBtn") return; // 歸零另處理
+
     btn.addEventListener("click", () => {
-      const step = Number(btn.dataset.step || 1);
+      const step = Number(btn.dataset.step || 5);
       stepMinutes = step;
 
       document.querySelectorAll(".step-btn").forEach((b) => {
+        if (b.id === "resetBtn") return;
         b.classList.remove("active");
       });
       btn.classList.add("active");
@@ -240,6 +238,17 @@ resetStepBtn.addEventListener("click", () => {
       updateTimerModeHint();
     });
   });
+
+  // 歸零按鈕
+  const resetBtn = document.getElementById("resetBtn");
+  if (resetBtn) {
+    resetBtn.addEventListener("click", () => {
+      plannedMinutes = 0;
+      updateDurationDisplay();
+      updateTimerModeHint();
+      setBearBubble("🐻 時間已經幫你歸零囉！");
+    });
+  }
 
   // 加減時間
   const minusBtn = document.getElementById("minusBtn");
@@ -254,15 +263,8 @@ resetStepBtn.addEventListener("click", () => {
     updateDurationDisplay();
     updateTimerModeHint();
   });
-  // 歸零按鈕
-document.getElementById("resetBtn").addEventListener("click", () => {
-  plannedMinutes = 0;
-  updateDurationDisplay();
-  updateTimerModeHint();
-  setBearBubble("🐻 時間已經幫你歸零囉！");
-});
 
-  // Start / Cancel（包含碼錶 + 倒數）
+  // Start / Cancel（碼錶 + 倒數）
   document.getElementById("startButton").addEventListener("click", startButtonHandler);
   document.getElementById("cancelButton").addEventListener("click", cancelTimer);
 
@@ -461,13 +463,13 @@ function updateCurrentActivityLabel() {
 
 // --------- Timer / 碼錶 ---------
 function startButtonHandler() {
-  // 若為碼錶模式正在跑：按下即「停止並結算」
+  // 碼錶模式正在跑：按下即「停止並結算」
   if (currentTimerMode === "stopwatch" && timerIntervalId) {
     finishStopwatch();
     return;
   }
 
-  // 若已有倒數計時在跑，不重複啟動
+  // 倒數模式正在跑：不重複啟動
   if (currentTimerMode === "countdown" && timerIntervalId) return;
 
   // 決定模式
@@ -939,6 +941,7 @@ function buyItem(category, id, price) {
   ownedItems[id].count += 1;
   saveOwnedItems();
   renderOwnedItems();
+  renderBagItems();
 
   alert(`購買成功！熊麻吉得到「${item.name}」囉～`);
   setBearBubble(`🐻 謝謝你幫我準備「${item.name}」，感覺好幸福！`);
@@ -981,4 +984,89 @@ function renderOwnedItems() {
     li.textContent = `【${item.categoryName}】${item.name} × ${item.count}`;
     list.appendChild(li);
   });
+}
+
+// --------- 背包（Modal） ---------
+function openBag() {
+  const modal = document.getElementById("bagModal");
+  if (!modal) return;
+  modal.style.display = "flex";
+  renderBagItems();
+}
+
+function closeBag() {
+  const modal = document.getElementById("bagModal");
+  if (!modal) return;
+  modal.style.display = "none";
+}
+
+function renderBagItems() {
+  const area = document.getElementById("bagItemsArea");
+  if (!area) return;
+  area.innerHTML = "";
+
+  const values = Object.entries(ownedItems);
+  if (!values.length) {
+    area.textContent = "背包裡還沒有東西，先去星星商店逛逛吧！";
+    return;
+  }
+
+  values.forEach(([id, item]) => {
+    if (!item.count || item.count <= 0) return;
+    const div = document.createElement("div");
+    div.className = "shop-item";
+    div.innerHTML = `
+      <div class="shop-item-info">
+        <div class="shop-item-name">
+          【${item.categoryName}】${item.name}
+        </div>
+        <div class="shop-item-price">
+          數量：${item.count}
+        </div>
+      </div>
+      <button type="button" onclick="useItem('${id}')">
+        使用
+      </button>
+    `;
+    area.appendChild(div);
+  });
+
+  if (!area.innerHTML.trim()) {
+    area.textContent = "背包裡的東西都用完了，再去星星商店逛逛吧！";
+  }
+}
+
+// 使用物品
+function useItem(id) {
+  const item = ownedItems[id];
+  if (!item || item.count <= 0) {
+    alert("這個物品已經用完囉。");
+    return;
+  }
+
+  const cat = item.category;
+  let message = "";
+
+  if (cat === "food" || cat === "fruits" || cat === "desserts") {
+    // 餵熊熊
+    message = `🐻 好好吃～謝謝你請我吃「${item.name}」，覺得被溫柔照顧了！`;
+  } else if (cat === "furniture") {
+    // 佈置小木屋（先用文字呈現）
+    message = `🐻 小木屋變得更溫暖了！「${item.name}」讓家裡好舒服。`;
+  } else if (cat === "study") {
+    message = `🐻 使用「${item.name}」來學習，感覺更有動力了！`;
+  } else if (cat === "fun") {
+    message = `🐻 和「${item.name}」一起玩，好開心～心情大加分！`;
+  } else {
+    message = `🐻 使用了「${item.name}」，謝謝你為我準備這些東西！`;
+  }
+
+  item.count -= 1;
+  if (item.count <= 0) {
+    delete ownedItems[id];
+  }
+  saveOwnedItems();
+  renderOwnedItems();
+  renderBagItems();
+  setBearBubble(message);
 }
