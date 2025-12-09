@@ -206,7 +206,6 @@
 
     if (forceMessage || !bearBubble.textContent) {
       var group = msgGroup || messages.idle;
-      // 閒置時優先顯示第一句
       if (mode === "idle") {
         bearBubble.textContent = messages.idle[0];
       } else {
@@ -253,7 +252,6 @@
 
   // ========== 日記相關 ==========
   function sameDate(iso, todayStr) {
-    // iso: "YYYY-MM-DDTHH:MM:SSZ"
     if (!iso) return false;
     return iso.slice(0, 10) === todayStr;
   }
@@ -462,7 +460,6 @@
       msg;
 
     modal.classList.remove("hidden");
-    // 小延遲讓動畫生效
     setTimeout(function () {
       modal.classList.add("show");
     }, 10);
@@ -582,7 +579,7 @@
     if (!alarms.length) return;
     var now = new Date();
     var hhmm = formatHHMM(now);
-    var today = now.toISOString().slice(0, 10); // YYYY-MM-DD
+    var today = now.toISOString().slice(0, 10);
 
     alarms.forEach(function (a) {
       if (!a.enabled) return;
@@ -669,7 +666,7 @@
       plusBtn.addEventListener("click", function () {
         currentMinutes += currentStep;
         if (currentMinutes < 0) currentMinutes = 0;
-        if (currentMinutes > 600) currentMinutes = 600; // 上限 10 小時
+        if (currentMinutes > 600) currentMinutes = 600;
         updateDurationUI();
       });
     }
@@ -727,7 +724,8 @@
         }, 200);
       });
     }
-    // 點擊背景關閉日記 Modal
+
+    // 點背景關閉日記 Modal
     if (allDiaryModal) {
       allDiaryModal.addEventListener("click", function (e) {
         if (e.target === allDiaryModal.querySelector(".modal-backdrop")) {
