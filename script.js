@@ -4,7 +4,7 @@ const bearImages = {
   study: "images/bear_reading.png", // 學習
   sport: "images/bear_sport.png",   // 運動
   fun: "images/bear_skill.png",     // 娛樂可先共用技能熊
-  rest: "images/bear_sleep.png"     // 休息
+  rest: "images/bear_sleep.gif"     // 休息
 };
 
 // --------- 預設作息 ---------
