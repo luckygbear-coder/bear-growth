@@ -1,0 +1,23 @@
+{
+  "name": "熊麻吉：陪你一起成長",
+  "short_name": "熊麻吉",
+  "description": "讓一隻小熊麻吉陪你一起學習、運動、放鬆、照顧自己。",
+  "start_url": "index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FFE9F2",
+  "theme_color": "#F7B5C5",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
