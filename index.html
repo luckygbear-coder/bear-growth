@@ -13,133 +13,135 @@
       <p>讓一隻小熊麻吉陪你一起讀書、運動、學新技能。</p>
     </header>
 
-    <!-- 🐻 熊熊區塊 -->
-    <section class="bear-panel">
-      <!-- 回家按鈕（圖片右上角小小的） -->
-      <button class="home-btn"
-        onclick="window.location.href='https://luckygbear-coder.github.io/HeroApp/index.html';">
-        回家
-      </button>
+    <div class="main-layout">
+      <!-- 🐻 熊熊 + 星星商店 -->
+      <section class="bear-panel">
+        <!-- 回家按鈕 -->
+        <button class="home-btn"
+          onclick="window.location.href='https://luckygbear-coder.github.io/HeroApp/index.html';">
+          回家
+        </button>
 
-      <!-- 熊麻吉畫面 -->
-      <div class="bear-visual mode-idle" id="bearVisual">
-        <!-- 這裡用你原本的熊麻吉圖片檔名 -->
-        <img id="bearImage" src="images/bear_idle1.png" alt="熊麻吉" />
-      </div>
-
-      <!-- 熊熊對話 -->
-      <div class="bear-bubble" id="bearBubble">
-        🐻 我是熊麻吉～今天想一起做什麼呢？
-      </div>
-
-      <!-- 熊熊名字列 -->
-      <div class="bear-name-row">
-        <span class="bear-name-label">熊熊名字：</span>
-        <span id="bearNameLabel" class="bear-name-value">熊麻吉</span>
-        <button id="editNameBtn" class="bear-name-edit-btn">改名字</button>
-      </div>
-
-      <!-- ⭐ 星星＆商店 -->
-      <div class="star-shop-bar" onclick="openShop()">
-        <div class="star-shop-left">
-          <span class="star-icon">⭐</span>
-          <span class="star-label">星星商店</span>
+        <!-- 熊麻吉畫面 -->
+        <div class="bear-visual mode-idle" id="bearVisual">
+          <img id="bearImage" src="images/bear_idle1.png" alt="熊麻吉" />
         </div>
-        <div class="star-shop-right">
-          <span class="star-count-label">目前星星：</span>
-          <span id="starCount" class="star-count-value">0</span>
+
+        <!-- 熊熊對話 -->
+        <div class="bear-bubble" id="bearBubble">
+          🐻 我是熊麻吉～今天想一起做什麼呢？
         </div>
-      </div>
-    </section>
 
-    <!-- 📊 成長狀態 -->
-    <section class="stats">
-      <div class="stats-header">
-        <h2>成長狀態</h2>
-        <button id="openAllDiaryBtn" class="stats-diary-btn">成長日記</button>
-      </div>
-
-      <div class="level-row">
-        <span>等級</span>
-        <span id="levelText">Lv. 1</span>
-      </div>
-
-      <div class="stat-row">
-        <span>閱讀 📖</span>
-        <div class="stat-bar">
-          <div id="readingBar" class="stat-fill"></div>
+        <!-- 熊熊名字列 -->
+        <div class="bear-name-row">
+          <span class="bear-name-label">熊熊名字：</span>
+          <span id="bearNameLabel" class="bear-name-value">熊麻吉</span>
+          <button id="editNameBtn" class="bear-name-edit-btn">改名字</button>
         </div>
-        <span id="readingValue" class="stat-value">0 分鐘</span>
-      </div>
 
-      <div class="stat-row">
-        <span>運動 💪</span>
-        <div class="stat-bar">
-          <div id="sportBar" class="stat-fill"></div>
+        <!-- ⭐ 星星＆商店 -->
+        <div class="star-shop-bar" onclick="openShop()">
+          <div class="star-shop-left">
+            <span class="star-icon">⭐</span>
+            <span class="star-label">星星商店</span>
+          </div>
+          <div class="star-shop-right">
+            <span class="star-count-label">目前星星：</span>
+            <span id="starCount" class="star-count-value">0</span>
+          </div>
         </div>
-        <span id="sportValue" class="stat-value">0 分鐘</span>
-      </div>
+      </section>
 
-      <div class="stat-row">
-        <span>技能 🎵</span>
-        <div class="stat-bar">
-          <div id="skillBar" class="stat-fill"></div>
+      <!-- 📊 成長狀態 -->
+      <section class="stats">
+        <div class="stats-header">
+          <h2>成長狀態</h2>
+          <button id="openAllDiaryBtn" class="stats-diary-btn">成長日記</button>
         </div>
-        <span id="skillValue" class="stat-value">0 分鐘</span>
-      </div>
-    </section>
 
-    <!-- ⏳ 任務／定時 -->
-    <section class="timer">
-      <div class="timer-header-row">
-        <h2>今天要做什麼？</h2>
-        <div class="timer-header-actions">
-          <button id="openAlarmModalBtn" class="timer-alarm-btn">⏰ 鬧鐘</button>
-          <button id="openScheduleBtn" class="timer-schedule-btn">⚙ 作息設定</button>
+        <div class="level-row">
+          <span>等級</span>
+          <span id="levelText">Lv. 1</span>
         </div>
-      </div>
 
-      <!-- 活動種類 -->
-      <div class="activity-buttons">
-        <button class="activity-btn active" data-activity="reading">📖 看書</button>
-        <button class="activity-btn" data-activity="sport">💪 運動</button>
-        <button class="activity-btn" data-activity="skill">🎵 練技能</button>
-      </div>
-
-      <!-- 可累加的時間設定 -->
-      <h3>設定本次專注時間（可以累加調整）</h3>
-
-      <div class="step-select-row">
-        <span class="step-label">每次調整：</span>
-        <div class="step-buttons">
-          <button class="step-btn active" data-step="1">1 分</button>
-          <button class="step-btn" data-step="5">5 分</button>
-          <button class="step-btn" data-step="10">10 分</button>
-          <button class="step-btn" data-step="30">30 分</button>
-          <button class="step-btn" data-step="60">60 分</button>
+        <div class="stat-row">
+          <span>閱讀 📖</span>
+          <div class="stat-bar">
+            <div id="readingBar" class="stat-fill"></div>
+          </div>
+          <span id="readingValue" class="stat-value">0 分鐘</span>
         </div>
-      </div>
 
-      <div class="duration-control">
-        <button id="minusBtn" class="round-btn">－</button>
-        <div id="durationMinutes" class="duration-display">0 分鐘</div>
-        <button id="plusBtn" class="round-btn">＋</button>
-      </div>
+        <div class="stat-row">
+          <span>運動 💪</span>
+          <div class="stat-bar">
+            <div id="sportBar" class="stat-fill"></div>
+          </div>
+          <span id="sportValue" class="stat-value">0 分鐘</span>
+        </div>
 
-      <!-- 定時器顯示 -->
-      <div class="timer-display" id="timerDisplay">
-        尚未開始
-      </div>
+        <div class="stat-row">
+          <span>技能 🎵</span>
+          <div class="stat-bar">
+            <div id="skillBar" class="stat-fill"></div>
+          </div>
+          <span id="skillValue" class="stat-value">0 分鐘</span>
+        </div>
+      </section>
 
-      <div class="timer-progress">
-        <div class="timer-progress-fill" id="timerProgressFill"></div>
-      </div>
+      <!-- ⏳ 任務／定時 -->
+      <section class="timer">
+        <div class="timer-header-row">
+          <h2>今天要做什麼？</h2>
+          <div class="timer-header-actions">
+            <button id="openAlarmModalBtn" class="timer-alarm-btn">⏰ 鬧鐘</button>
+            <button id="openScheduleBtn" class="timer-schedule-btn">⚙ 作息設定</button>
+          </div>
+        </div>
 
-      <div class="timer-actions">
-        <button class="primary-btn" id="startButton">開始陪伴</button>
-        <button class="ghost-btn" id="cancelButton" disabled>結束 / 取消</button>
-      </div>
-    </section>
+        <!-- 活動種類 + 睡覺 -->
+        <div class="activity-buttons">
+          <button class="activity-btn active" data-activity="reading">📖 看書</button>
+          <button class="activity-btn" data-activity="sport">💪 運動</button>
+          <button class="activity-btn" data-activity="skill">🎵 練技能</button>
+          <button class="activity-btn" data-activity="sleep">😴 睡覺</button>
+        </div>
+
+        <!-- 可累加的時間設定 -->
+        <h3>設定本次專注時間（可以累加調整）</h3>
+
+        <div class="step-select-row">
+          <span class="step-label">每次調整：</span>
+          <div class="step-buttons">
+            <button class="step-btn active" data-step="1">1 分</button>
+            <button class="step-btn" data-step="5">5 分</button>
+            <button class="step-btn" data-step="10">10 分</button>
+            <button class="step-btn" data-step="30">30 分</button>
+            <button class="step-btn" data-step="60">60 分</button>
+          </div>
+        </div>
+
+        <div class="duration-control">
+          <button id="minusBtn" class="round-btn">－</button>
+          <div id="durationMinutes" class="duration-display">0 分鐘</div>
+          <button id="plusBtn" class="round-btn">＋</button>
+        </div>
+
+        <!-- 定時器顯示 -->
+        <div class="timer-display" id="timerDisplay">
+          尚未開始
+        </div>
+
+        <div class="timer-progress">
+          <div class="timer-progress-fill" id="timerProgressFill"></div>
+        </div>
+
+        <div class="timer-actions">
+          <button class="primary-btn" id="startButton">開始陪伴</button>
+          <button class="ghost-btn" id="cancelButton" disabled>結束 / 取消</button>
+        </div>
+      </section>
+    </div>
   </div>
 
   <!-- 🎉 完成任務鼓勵 Modal -->
