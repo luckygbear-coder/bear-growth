@@ -30,11 +30,10 @@
       </div>
     </section>
 
-    <!-- 📊 成長狀態 -->
+    <!-- 📊 成長狀態（右上角有成長日記） -->
     <section class="stats">
       <div class="stats-header">
         <h2>成長狀態</h2>
-        <!-- 成長日記按鈕（右上角） -->
         <button id="openAllDiaryBtn" class="stats-diary-btn">成長日記</button>
       </div>
 
@@ -68,9 +67,13 @@
       </div>
     </section>
 
-    <!-- ⏳ 任務／定時／今日日記／鬧鐘 -->
+    <!-- ⏳ 任務／定時 -->
     <section class="timer">
-      <h2>今天要做什麼？</h2>
+      <div class="timer-header-row">
+        <h2>今天要做什麼？</h2>
+        <!-- 小顆鬧鐘按鈕 -->
+        <button id="openAlarmModalBtn" class="timer-alarm-btn">⏰ 鬧鐘</button>
+      </div>
 
       <!-- 活動種類 -->
       <div class="activity-buttons">
@@ -112,42 +115,6 @@
         <button class="primary-btn" id="startButton">開始陪伴</button>
         <button class="ghost-btn" id="cancelButton" disabled>結束 / 取消</button>
       </div>
-
-
-      <hr class="soft-hr" />
-
-      <!-- 🔔 鬧鐘排程區 -->
-      <div class="alarm-block">
-        <h3>鬧鐘提醒</h3>
-
-        <div class="alarm-form">
-          <div class="alarm-row">
-            <label for="alarmActivity">活動：</label>
-            <select id="alarmActivity">
-              <option value="reading">📖 看書</option>
-              <option value="sport">💪 運動</option>
-              <option value="skill">🎵 練技能</option>
-            </select>
-          </div>
-
-          <div class="alarm-row">
-            <label for="alarmTime">時間：</label>
-            <input id="alarmTime" type="time" />
-          </div>
-
-          <div class="alarm-row">
-            <label for="alarmLabel">備註：</label>
-            <input id="alarmLabel" type="text" placeholder="例如：睡前閱讀 / 晚上運動" />
-          </div>
-
-          <button id="addAlarmBtn" class="primary-btn small-btn">新增鬧鐘</button>
-          <p class="alarm-tip">＊網頁必須開著，鬧鐘才會提醒喔。</p>
-        </div>
-
-        <div class="alarm-list" id="alarmList">
-          目前還沒有鬧鐘，試著安排一個吧！
-        </div>
-      </div>
     </section>
   </div>
 
@@ -177,6 +144,45 @@
       </div>
       <div id="allDiaryList" class="diary-list all-diary-list">
         目前還沒有任何紀錄。
+      </div>
+    </div>
+  </div>
+
+  <!-- ⏰ 鬧鐘設定 Modal -->
+  <div id="alarmModal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-card alarm-card">
+      <div class="modal-header-row">
+        <h3>鬧鐘提醒</h3>
+        <button id="closeAlarmModalBtn" class="icon-btn">✕</button>
+      </div>
+
+      <div class="alarm-form">
+        <div class="alarm-row">
+          <label for="alarmActivity">活動：</label>
+          <select id="alarmActivity">
+            <option value="reading">📖 看書</option>
+            <option value="sport">💪 運動</option>
+            <option value="skill">🎵 練技能</option>
+          </select>
+        </div>
+
+        <div class="alarm-row">
+          <label for="alarmTime">時間：</label>
+          <input id="alarmTime" type="time" />
+        </div>
+
+        <div class="alarm-row">
+          <label for="alarmLabel">備註：</label>
+          <input id="alarmLabel" type="text" placeholder="例如：睡前閱讀 / 晚上運動" />
+        </div>
+
+        <button id="addAlarmBtn" class="primary-btn small-btn">新增鬧鐘</button>
+        <p class="alarm-tip">＊網頁必須開著，鬧鐘才會提醒喔。</p>
+      </div>
+
+      <div id="alarmList" class="alarm-list">
+        目前還沒有鬧鐘，試著安排一個吧！
       </div>
     </div>
   </div>
