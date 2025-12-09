@@ -161,7 +161,7 @@ body {
   cursor: pointer;
 }
 
-/* 星星商店列 */
+/* 星星商店 + 背包 列 */
 .star-shop-bar {
   margin-top: 2px;
   padding: 4px 8px;
@@ -172,24 +172,30 @@ body {
   justify-content: space-between;
   align-items: center;
   font-size: 12px;
-  cursor: pointer;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.06);
   width: 100%;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.06);
 }
 
-.star-shop-left {
+.star-shop-main {
   display: flex;
   align-items: center;
   gap: 4px;
 }
 
-.star-icon {
-  font-size: 16px;
+.star-shop-btn {
+  border-radius: 999px;
+  border: 1px solid #f0c27d;
+  background: #ffe7b5;
+  padding: 3px 8px;
+  font-size: 11px;
+  cursor: pointer;
+  color: #8a5a25;
 }
 
-.star-label {
-  color: #946233;
-  font-weight: 600;
+.bag-btn {
+  background: #ffe8e5;
+  border-color: #f1b2b0;
+  color: #95505a;
 }
 
 .star-shop-right {
@@ -206,6 +212,7 @@ body {
 .star-count-value {
   font-weight: bold;
   color: #e48d23;
+  font-size: 13px;
 }
 
 /* --------- Growth / Circles --------- */
@@ -269,7 +276,6 @@ body {
   height: 64px;
   border-radius: 50%;
   padding: 3px;
-  /* 有一圈淡粉底，進度條是較深的粉色 */
   background: conic-gradient(#ff9fb7 var(--progress), #ffe0ec 0 360deg);
   display: flex;
   align-items: center;
@@ -393,6 +399,18 @@ body {
   background: #ffbdd1;
   border-color: #e38b9d;
   color: #6a2c3a;
+}
+
+/* 歸零按鈕特別樣式 */
+.step-btn.reset-btn {
+  background: #ffe3e8;
+  border-color: #f3b4c1;
+  color: #c25d75;
+}
+
+.step-btn.reset-btn:active {
+  background: #ffb8c7;
+  color: #ffffff;
 }
 
 .duration-control {
@@ -696,7 +714,7 @@ body {
   opacity: 0;
 }
 
-/* --------- 商店 --------- */
+/* --------- 商店 & 背包 --------- */
 .shop-modal {
   position: fixed;
   inset: 0;
@@ -764,7 +782,7 @@ body {
   border-color: #e49b3c;
 }
 
-/* 商品列表 */
+/* 商品列表 / 背包內容區 */
 .shop-items-area {
   max-height: 260px;
   overflow-y: auto;
@@ -816,7 +834,7 @@ body {
   color: #fff;
 }
 
-/* 擁有物品 */
+/* 擁有物品（商店內下方） */
 .owned-items-box {
   border-top: 1px dashed #f0c48d;
   padding-top: 6px;
@@ -844,30 +862,5 @@ body {
   border: 1px solid #f4d7af;
   margin-bottom: 4px;
 }
-.reset-btn {
-  margin-top: 3px;
-  border: none;
-  background: #ffe3e8;
-  color: #c26a7d;
-  border-radius: 999px;
-  padding: 3px 10px;
-  font-size: 11px;
-  cursor: pointer;
-  border: 1px solid #f2b7c3;
-  transition: 0.15s;
-}
 
-.reset-btn:active {
-  background: #ffb8c7;
-  color: white;
-}
-.step-btn.reset-btn {
-  background: #ffe3e8;
-  border-color: #f3b4c1;
-  color: #c25d75;
-}
-
-.step-btn.reset-btn:active {
-  background: #ffb8c7;
-  color: white;
-}
+/* ===== End of style.css ===== */
