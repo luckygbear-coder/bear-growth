@@ -56,10 +56,10 @@ section {
   align-items: center;
 }
 
-/* 熊熊視覺區：童話感圓形框＋晃動動畫 */
+/* 熊熊視覺區：固定大小，不讓圖片蓋滿畫面 */
 .bear-visual {
-  width: 160px;
-  height: 160px;
+  width: 200px;
+  height: 200px;
   border-radius: 50%;
   margin-top: 4px;
   background: radial-gradient(circle at 30% 20%, #ffe7ad, #ffc3d4);
@@ -68,9 +68,18 @@ section {
   align-items: center;
   justify-content: center;
   position: relative;
+  overflow: hidden;
   animation: bearFloat 3s ease-in-out infinite;
 }
 
+/* 讓熊熊保持完整比例顯示在圓框裡 */
+#bearImage {
+  width: 80%;
+  height: auto;
+  object-fit: contain;
+}
+
+/* 浮動動畫 */
 @keyframes bearFloat {
   0% {
     transform: translateY(0);
@@ -83,86 +92,7 @@ section {
   }
 }
 
-/* 用 CSS 畫一個簡單熊臉（手繪感） */
-.bear-face {
-  width: 80px;
-  height: 70px;
-  background: #8b5c3b;
-  border-radius: 48px;
-  position: relative;
-}
-
-/* 耳朵 */
-.bear-ear {
-  width: 26px;
-  height: 26px;
-  background: #8b5c3b;
-  border-radius: 50%;
-  position: absolute;
-  top: -12px;
-}
-
-.bear-ear-left {
-  left: 4px;
-}
-
-.bear-ear-right {
-  right: 4px;
-}
-
-/* 眼睛 */
-.bear-eye {
-  width: 8px;
-  height: 8px;
-  background: #fff;
-  border-radius: 50%;
-  position: absolute;
-  top: 24px;
-}
-
-.bear-eye-left {
-  left: 20px;
-}
-
-.bear-eye-right {
-  right: 20px;
-}
-
-.bear-eye::after {
-  content: "";
-  width: 4px;
-  height: 4px;
-  background: #2d1a16;
-  border-radius: 50%;
-  position: absolute;
-  top: 2px;
-  left: 2px;
-}
-
-/* 鼻子＋嘴巴 */
-.bear-nose {
-  width: 18px;
-  height: 14px;
-  background: #2d1a16;
-  border-radius: 10px;
-  position: absolute;
-  top: 34px;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.bear-mouth {
-  width: 26px;
-  height: 16px;
-  border-bottom: 3px solid #2d1a16;
-  border-radius: 0 0 16px 16px;
-  position: absolute;
-  top: 42px;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-/* 不同模式時，外圈顏色變化（閱讀／運動／技能） */
+/* 不同模式外圈顏色 */
 .bear-visual.mode-reading {
   background: radial-gradient(circle at 30% 20%, #fff1b8, #ffd58b);
 }
@@ -185,6 +115,7 @@ section {
   border: 1px dashed #f0b882;
   padding: 8px 10px;
   position: relative;
+  max-width: 100%;
 }
 
 .bear-bubble::before {
@@ -257,15 +188,13 @@ section {
 }
 
 /* 活動按鈕 */
-.activity-buttons,
-.duration-buttons {
+.activity-buttons {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
 }
 
-.activity-btn,
-.duration-btn {
+.activity-btn {
   flex: 1;
   min-width: 90px;
   border-radius: 999px;
@@ -279,19 +208,81 @@ section {
   transition: all 0.15s ease;
 }
 
-.activity-btn:hover,
-.duration-btn:hover {
+.activity-btn:hover {
   transform: translateY(-1px);
 }
 
-.activity-btn.active,
-.duration-btn.active {
+.activity-btn.active {
   background: linear-gradient(90deg, #ffce9f, #ff9fc8);
   color: #4b3044;
   border-color: #f0937f;
 }
 
-/* 定時器狀態顯示 */
+/* 調整步進值 */
+.step-select-row {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #7a4a5b;
+}
+
+.step-label {
+  white-space: nowrap;
+}
+
+.step-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.step-btn {
+  border-radius: 999px;
+  border: 1px solid #f1c3a7;
+  padding: 4px 8px;
+  font-size: 12px;
+  background: #fff7e6;
+  color: #7a4a5b;
+  cursor: pointer;
+}
+
+.step-btn.active {
+  background: linear-gradient(90deg, #ffce9f, #ff9fc8);
+  color: #4b3044;
+  border-color: #f0937f;
+}
+
+/* + / - 調時間 */
+.duration-control {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.round-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid #f1c3a7;
+  background: #fffaf0;
+  font-size: 20px;
+  cursor: pointer;
+  color: #7a4a5b;
+}
+
+.duration-display {
+  min-width: 90px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 600;
+  color: #7a4a5b;
+}
+
+/* 定時器顯示與進度條 */
 .timer-display {
   margin-top: 10px;
   font-size: 14px;
@@ -299,7 +290,6 @@ section {
   color: #7a4a5b;
 }
 
-/* 進度條 */
 .timer-progress {
   margin-top: 6px;
   width: 100%;
@@ -357,6 +347,161 @@ section {
   cursor: default;
 }
 
+/* 小日記 */
+.diary-actions {
+  margin-top: 12px;
+}
+
+.diary-panel {
+  margin-top: 10px;
+  padding: 8px 10px 10px;
+  border-radius: 14px;
+  background: #fffaf0;
+  border: 1px dashed #f1c3a7;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.diary-panel h3 {
+  margin: 0 0 6px;
+  font-size: 14px;
+  color: #85415b;
+}
+
+.diary-list {
+  font-size: 12px;
+}
+
+.diary-item {
+  padding: 4px 0;
+  border-bottom: 1px dashed #f1c3a7;
+  font-size: 12px;
+}
+
+.diary-item:last-child {
+  border-bottom: none;
+}
+
+.diary-main {
+  color: #7a4a5b;
+}
+
+.diary-sub {
+  color: #9a6b7a;
+  margin-top: 2px;
+}
+
+/* 鬧鐘區塊 */
+.soft-hr {
+  margin: 14px 0 10px;
+  border: none;
+  border-top: 1px dashed #f1c3a7;
+}
+
+.alarm-block h3 {
+  margin: 0 0 6px;
+  font-size: 14px;
+  color: #85415b;
+}
+
+.alarm-form {
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+.alarm-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.alarm-row label {
+  width: 48px;
+  color: #7a4a5b;
+}
+
+.alarm-row input,
+.alarm-row select {
+  flex: 1;
+  border-radius: 999px;
+  border: 1px solid #f1c3a7;
+  padding: 4px 8px;
+  font-size: 13px;
+  background: #fffdf6;
+}
+
+.small-btn {
+  width: 100%;
+  margin-top: 4px;
+  padding: 6px 8px;
+  font-size: 13px;
+}
+
+.alarm-tip {
+  margin: 4px 0 0;
+  font-size: 11px;
+  color: #b1848f;
+}
+
+.alarm-list {
+  margin-top: 6px;
+  font-size: 12px;
+  max-height: 180px;
+  overflow-y: auto;
+  background: #fffaf0;
+  border-radius: 10px;
+  border: 1px dashed #f1c3a7;
+  padding: 6px 8px;
+}
+
+.alarm-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 4px 0;
+  border-bottom: 1px dashed #f1c3a7;
+}
+
+.alarm-item:last-child {
+  border-bottom: none;
+}
+
+.alarm-main {
+  flex: 1;
+}
+
+.alarm-time {
+  font-weight: 600;
+  color: #7a4a5b;
+}
+
+.alarm-activity {
+  color: #9a6b7a;
+}
+
+.alarm-label-text {
+  color: #b1848f;
+}
+
+.alarm-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-left: 6px;
+}
+
+.toggle-btn,
+.delete-btn {
+  border-radius: 999px;
+  border: 1px solid #f1c3a7;
+  padding: 2px 6px;
+  font-size: 11px;
+  background: #fffdf6;
+  color: #7a4a5b;
+  cursor: pointer;
+}
+
 /* footer */
 .app-footer {
   margin-top: 14px;
@@ -372,13 +517,17 @@ section {
 }
 
 /* 小螢幕優化 */
-@media (max-width: 360px) {
+@media (max-width: 400px) {
   .app {
     padding: 10px 10px 24px;
   }
 
   .bear-visual {
-    width: 140px;
-    height: 140px;
+    width: 170px;
+    height: 170px;
+  }
+
+  #bearImage {
+    width: 78%;
   }
 }
