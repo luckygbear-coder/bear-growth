@@ -14,7 +14,7 @@
     </header>
 
     <div class="main-layout">
-      <!-- 🐻 熊熊 + 星星商店 -->
+      <!-- 🐻 熊熊 + 星星商店 + 背包 -->
       <section class="bear-panel">
         <!-- 回家按鈕 -->
         <button class="home-btn"
@@ -39,11 +39,11 @@
           <button id="editNameBtn" class="bear-name-edit-btn">改名字</button>
         </div>
 
-        <!-- ⭐ 星星＆商店 -->
-        <div class="star-shop-bar" onclick="openShop()">
-          <div class="star-shop-left">
-            <span class="star-icon">⭐</span>
-            <span class="star-label">星星商店</span>
+        <!-- ⭐ 星星商店＋🎒 背包 列 -->
+        <div class="star-shop-bar">
+          <div class="star-shop-main">
+            <button id="openShopBtn" class="star-shop-btn" onclick="openShop()">⭐ 星星商店</button>
+            <button id="openBagBtn" class="star-shop-btn bag-btn" onclick="openBag()">🎒 背包</button>
           </div>
           <div class="star-shop-right">
             <span class="star-count-label">目前星星：</span>
@@ -67,7 +67,7 @@
           今日累積：<span id="totalMinutesText">0 分鐘</span>（每 3 小時升 1 級）
         </div>
         <div class="level-small-row">
-          小獎狀：<span id="trophyText">0 個</span>（每滿 1 小時送 1 個🏅）
+          小獎狀：<span id="trophyText">0 個</span>（每滿 1 小時送 1 個 🏅）
         </div>
 
         <div class="activity-circle-row">
@@ -139,24 +139,20 @@
 
         <div class="step-select-row">
           <span class="step-label">每次調整：</span>
-<div class="step-buttons">
-  <button id="resetBtn" class="step-btn reset-btn">歸零</button>
-  <button class="step-btn" data-step="5">5 分</button>
-  <button class="step-btn" data-step="10">10 分</button>
-  <button class="step-btn" data-step="30">30 分</button>
-  <button class="step-btn" data-step="60">60 分</button>
-</div>
+          <div class="step-buttons">
+            <button id="resetBtn" class="step-btn reset-btn">歸零</button>
+            <button class="step-btn active" data-step="5">5 分</button>
+            <button class="step-btn" data-step="10">10 分</button>
+            <button class="step-btn" data-step="30">30 分</button>
+            <button class="step-btn" data-step="60">60 分</button>
+          </div>
+        </div>
 
-<div class="duration-control">
-  <button id="minusBtn" class="round-btn">－</button>
-
-  <div style="display: flex; flex-direction: column; align-items: center;">
-    <div id="durationMinutes" class="duration-display">0 分鐘</div>
-    <button id="resetBtn" class="reset-btn">歸零</button>
-  </div>
-
-  <button id="plusBtn" class="round-btn">＋</button>
-</div>
+        <div class="duration-control">
+          <button id="minusBtn" class="round-btn">－</button>
+          <div id="durationMinutes" class="duration-display">0 分鐘</div>
+          <button id="plusBtn" class="round-btn">＋</button>
+        </div>
 
         <!-- 定時 / 碼錶顯示 -->
         <div class="timer-display" id="timerDisplay">
@@ -334,7 +330,7 @@
   <!-- ⭐ 星星結果訊息（活動結束彈出用） -->
   <div id="starResultToast" class="toast-panel"></div>
 
-  <!-- 🛒 商店視窗 -->
+  <!-- 🛒 星星商店視窗 -->
   <div id="shopModal" class="shop-modal">
     <div class="shop-window">
       <button class="shop-close-btn" type="button" onclick="closeShop()">✖</button>
@@ -360,6 +356,19 @@
         <ul id="ownedItemsList" class="owned-items-list">
           <li>還沒有買任何東西，先去逛逛商店吧！</li>
         </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🎒 背包視窗（Modal A 版） -->
+  <div id="bagModal" class="shop-modal">
+    <div class="shop-window">
+      <button class="shop-close-btn" type="button" onclick="closeBag()">✖</button>
+      <h2>🎒 熊麻吉的背包</h2>
+      <p class="shop-tip">這裡放的是你在星星商店買回來的東西，可以餵食熊麻吉或佈置小木屋。</p>
+
+      <div id="bagItemsArea" class="shop-items-area">
+        <!-- 由 JS 動態產生：顯示擁有物品 +「使用」按鈕 -->
       </div>
     </div>
   </div>
