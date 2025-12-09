@@ -148,11 +148,16 @@
           </div>
         </div>
 
-        <div class="duration-control">
-          <button id="minusBtn" class="round-btn">－</button>
-          <div id="durationMinutes" class="duration-display">0 分鐘</div>
-          <button id="plusBtn" class="round-btn">＋</button>
-        </div>
+<div class="duration-control">
+  <button id="minusBtn" class="round-btn">－</button>
+
+  <div style="display: flex; flex-direction: column; align-items: center;">
+    <div id="durationMinutes" class="duration-display">0 分鐘</div>
+    <button id="resetBtn" class="reset-btn">歸零</button>
+  </div>
+
+  <button id="plusBtn" class="round-btn">＋</button>
+</div>
 
         <!-- 定時 / 碼錶顯示 -->
         <div class="timer-display" id="timerDisplay">
