@@ -1,5 +1,4 @@
-// 成長熊 手機終極版
-// 可累加時間＋10 分鐘小語＋今日日記＋全部日記 Modal＋鬧鐘＋三種活動圖片＋三種閒置熊隨機
+// 成長熊 手機版：可累加時間 + 鼓勵話語 + 成長日記 + 鬧鐘彈窗
 
 (function () {
   // ========== 狀態 ==========
@@ -18,7 +17,7 @@
     level: 1,
   };
 
-  var diary = []; // {activity, minutes, startISO, endISO}
+  var diary = [];  // {activity, minutes, startISO, endISO}
   var alarms = []; // {id, activity, timeHHMM, label, enabled, lastDateTriggered}
 
   var activityLabels = {
@@ -99,7 +98,6 @@
 
   // ========== 熊熊小語 ==========
   var messages = {
-    // 閒置熊話語
     idle: [
       "🐻 我們今天要一起做什麼呢？",
       "🐻 我在這裡等你，一起選一件小事開始吧。",
@@ -146,7 +144,6 @@
     if (!levelText) return;
 
     levelText.textContent = "Lv. " + state.level;
-
     readingValue.textContent = state.reading + " 分鐘";
     sportValue.textContent = state.sport + " 分鐘";
     skillValue.textContent = state.skill + " 分鐘";
@@ -250,12 +247,7 @@
     el.textContent = currentMinutes + " 分鐘";
   }
 
-  // ========== 日記相關 ==========
-  function sameDate(iso, todayStr) {
-    if (!iso) return false;
-    return iso.slice(0, 10) === todayStr;
-  }
-
+  // ========== 日記 ==========
   function formatDateTime(iso) {
     var d = new Date(iso);
     if (isNaN(d.getTime())) return iso;
@@ -267,43 +259,6 @@
     return y + "/" + m + "/" + day + " " + hh + ":" + mm;
   }
 
-  // 今日日記（只顯示今天）
-  function updateTodayDiaryUI() {
-    var list = document.getElementById("todayDiaryList");
-    if (!list) return;
-
-    var today = new Date().toISOString().slice(0, 10);
-
-    var todays = diary.filter(function (item) {
-      return sameDate(item.startISO, today);
-    });
-
-    if (!todays.length) {
-      list.textContent = "今天還沒有紀錄，完成一次活動就會出現囉～";
-      return;
-    }
-
-    var html = todays
-      .slice()
-      .reverse()
-      .map(function (item) {
-        var label = activityLabels[item.activity] || item.activity;
-        return (
-          '<div class="diary-item">' +
-          '<div class="diary-main">· ' +
-          label +
-          " — " +
-          item.minutes +
-          " 分鐘</div>" +
-          "</div>"
-        );
-      })
-      .join("");
-
-    list.innerHTML = html;
-  }
-
-  // 全部日記（Modal 用）
   function updateAllDiaryUI() {
     var list = document.getElementById("allDiaryList");
     if (!list) return;
@@ -368,7 +323,6 @@
     saveState();
     saveDiary();
     updateStatsUI();
-    updateTodayDiaryUI();
 
     showCompletionModal(record);
   }
@@ -377,7 +331,7 @@
   function maybeEncourage(totalSeconds, remainingSecondsNow) {
     var elapsed = totalSeconds - remainingSecondsNow;
     if (elapsed <= 0) return;
-    var elapsed10 = Math.floor(elapsed / 600) * 600; // 600 秒 = 10 分鐘
+    var elapsed10 = Math.floor(elapsed / 600) * 600;
     if (elapsed10 <= 0) return;
     if (elapsed10 === lastEncourageSecond) return;
 
@@ -633,6 +587,10 @@
     var modalAgainBtn = document.getElementById("modalAgainBtn");
     var modalRestBtn = document.getElementById("modalRestBtn");
 
+    var openAlarmModalBtn = document.getElementById("openAlarmModalBtn");
+    var alarmModal = document.getElementById("alarmModal");
+    var closeAlarmModalBtn = document.getElementById("closeAlarmModalBtn");
+
     var addAlarmBtn = document.getElementById("addAlarmBtn");
     var alarmActivity = document.getElementById("alarmActivity");
     var alarmTime = document.getElementById("alarmTime");
@@ -762,6 +720,38 @@
       });
     }
 
+    // 打開鬧鐘 Modal
+    if (openAlarmModalBtn && alarmModal) {
+      openAlarmModalBtn.addEventListener("click", function () {
+        updateAlarmsUI();
+        alarmModal.classList.remove("hidden");
+        setTimeout(function () {
+          alarmModal.classList.add("show");
+        }, 10);
+      });
+    }
+
+    // 關閉鬧鐘 Modal
+    if (closeAlarmModalBtn && alarmModal) {
+      closeAlarmModalBtn.addEventListener("click", function () {
+        alarmModal.classList.remove("show");
+        setTimeout(function () {
+          alarmModal.classList.add("hidden");
+        }, 200);
+      });
+    }
+
+    if (alarmModal) {
+      alarmModal.addEventListener("click", function (e) {
+        if (e.target === alarmModal.querySelector(".modal-backdrop")) {
+          alarmModal.classList.remove("show");
+          setTimeout(function () {
+            alarmModal.classList.add("hidden");
+          }, 200);
+        }
+      });
+    }
+
     // 新增鬧鐘
     if (addAlarmBtn) {
       addAlarmBtn.addEventListener("click", function () {
@@ -785,8 +775,7 @@
     updateStatsUI();
     resetTimerUI();
     updateDurationUI();
-    setBearMode("idle", true); // 一載入：閒置熊三選一＋閒置小語
-    updateTodayDiaryUI();
+    setBearMode("idle", true);
     updateAlarmsUI();
     setupEvents();
 
