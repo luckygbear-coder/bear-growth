@@ -66,13 +66,16 @@
         <div class="level-small-row">
           今日累積：<span id="totalMinutesText">0 分鐘</span>（每 3 小時升 1 級）
         </div>
+        <div class="level-small-row">
+          小獎狀：<span id="trophyText">0 個</span>（每滿 1 小時送 1 個🏅）
+        </div>
 
         <div class="activity-circle-row">
           <!-- 學習 -->
           <div class="activity-circle" data-activity="study">
             <div class="activity-circle-outer" id="circle-study">
               <div class="activity-circle-inner">
-                <div class="activity-icon">📚</div>
+                <div class="activity-icon">📝</div>
                 <div class="activity-label">學習</div>
               </div>
             </div>
@@ -83,7 +86,7 @@
           <div class="activity-circle" data-activity="sport">
             <div class="activity-circle-outer" id="circle-sport">
               <div class="activity-circle-inner">
-                <div class="activity-icon">💪</div>
+                <div class="activity-icon">🏃</div>
                 <div class="activity-label">運動</div>
               </div>
             </div>
@@ -94,7 +97,7 @@
           <div class="activity-circle" data-activity="fun">
             <div class="activity-circle-outer" id="circle-fun">
               <div class="activity-circle-inner">
-                <div class="activity-icon">🎮</div>
+                <div class="activity-icon">🎵</div>
                 <div class="activity-label">娛樂</div>
               </div>
             </div>
@@ -114,7 +117,7 @@
         </div>
       </section>
 
-      <!-- ⏳ 任務／定時（不再有活動按鈕，活動在上面選） -->
+      <!-- ⏳ 任務／定時／碼錶 -->
       <section class="timer">
         <div class="timer-header-row">
           <h2>今天要做什麼？</h2>
@@ -124,7 +127,15 @@
           </div>
         </div>
 
+        <!-- 目前選擇活動 -->
+        <div class="current-activity-label" id="currentActivityText">
+          目前活動：學習（預設）
+        </div>
+
         <h3>設定本次時間（可以累加調整）</h3>
+        <p class="timer-tip">
+          若時間為 0 分鐘：進入 <strong>碼錶模式</strong>，按「開始」後會幫你記錄實際花多久時間，再按一次停止。
+        </p>
 
         <div class="step-select-row">
           <span class="step-label">每次調整：</span>
@@ -143,7 +154,7 @@
           <button id="plusBtn" class="round-btn">＋</button>
         </div>
 
-        <!-- 定時器顯示 -->
+        <!-- 定時 / 碼錶顯示 -->
         <div class="timer-display" id="timerDisplay">
           尚未開始
         </div>
@@ -173,6 +184,9 @@
         本次「<span id="completionActivityLabel">學習</span>」
         共 <span id="completionMinutesLabel">0</span> 分鐘，
         得到 <span id="completionStarsLabel">0</span> 顆星星 ⭐
+      </p>
+      <p id="completionTrophyLine" class="completion-stars-text" style="display:none;">
+        🎖 恭喜又多了一個小獎狀，目前共 <span id="completionTrophyTotal">0</span> 個！
       </p>
       <div class="modal-actions">
         <button id="modalAgainBtn" class="primary-btn full-width">再來一輪</button>
@@ -208,9 +222,9 @@
         <div class="alarm-row">
           <label for="alarmActivity">活動：</label>
           <select id="alarmActivity">
-            <option value="study">📚 學習</option>
-            <option value="sport">💪 運動</option>
-            <option value="fun">🎮 娛樂</option>
+            <option value="study">📝 學習</option>
+            <option value="sport">🏃 運動</option>
+            <option value="fun">🎵 娛樂</option>
             <option value="rest">😴 休息</option>
           </select>
         </div>
