@@ -1,4 +1,4 @@
-// 成長熊 v3＋閒置熊三種隨機版
+// 成長熊 終極版
 // 可累加時間＋10 分鐘小語＋小日記＋鬧鐘＋三種活動圖片＋三種閒置熊隨機
 
 (function () {
@@ -34,7 +34,7 @@
     skill: "images/bear_skill.png",
   };
 
-  // 三種閒置熊，載入時會隨機選一隻
+  // 三種閒置熊，載入／回到閒置時隨機選一隻
   var idleImages = [
     "images/bear_idle1.png",
     "images/bear_idle2.png",
@@ -96,7 +96,7 @@
 
   // ========== 熊熊小語 ==========
   var messages = {
-    // 閒置熊話語，照你說的第一句固定是這句
+    // 閒置熊話語
     idle: [
       "🐻 我們今天要一起做什麼呢？",
       "🐻 我在這裡等你，一起選一件小事開始吧。",
@@ -164,12 +164,9 @@
     if (!img) return;
 
     if (mode === "idle") {
-      // 每次回到閒置模式，就隨機抽一隻熊
-      var src = randomFrom(idleImages);
-      img.src = src;
+      img.src = randomFrom(idleImages);
     } else {
-      var src = activityImages[mode] || randomFrom(idleImages);
-      img.src = src;
+      img.src = activityImages[mode] || randomFrom(idleImages);
     }
   }
 
@@ -197,9 +194,9 @@
       bearVisual.classList.add("mode-skill");
       msgGroup = messages.skill;
     } else {
+      mode = "idle";
       bearVisual.classList.add("mode-idle");
       msgGroup = messages.idle;
-      mode = "idle";
     }
 
     setBearImage(mode);
@@ -594,7 +591,7 @@
       plusBtn.addEventListener("click", function () {
         currentMinutes += currentStep;
         if (currentMinutes < 0) currentMinutes = 0;
-        if (currentMinutes > 600) currentMinutes = 600;
+        if (currentMinutes > 600) currentMinutes = 600; // 上限 10 小時
         updateDurationUI();
       });
     }
