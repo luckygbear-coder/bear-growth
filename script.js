@@ -1,7 +1,7 @@
-// 成長熊 手機版：可累加時間 + 鼓勵話語 + 成長日記 + 鬧鐘彈窗
+// 熊麻吉：定時器 + 成長狀態 + 成長日記 + 鬧鐘 + 作息（睡覺 / 肚子餓提示）+ 取名字
 
 (function () {
-  // ========== 狀態 ==========
+  // ========= 基本狀態 =========
   var currentActivity = "reading"; // reading | sport | skill
   var currentMinutes = 0;
   var currentStep = 1;
@@ -15,10 +15,11 @@
     sport: 0,
     skill: 0,
     level: 1,
+    sleepExp: 0, // 預留睡眠經驗值
   };
 
-  var diary = [];  // {activity, minutes, startISO, endISO}
-  var alarms = []; // {id, activity, timeHHMM, label, enabled, lastDateTriggered}
+  var diary = []; // {activity, minutes, startISO, endISO}
+  var alarms = []; // 鬧鐘資料
 
   var activityLabels = {
     reading: "看書",
@@ -26,82 +27,52 @@
     skill: "練技能",
   };
 
-  // 三種活動用的熊熊圖片
-  var activityImages = {
-    reading: "images/bear_reading.png",
-    sport: "images/bear_sport.png",
-    skill: "images/bear_skill.png",
+  // ========= 作息預設（可用 UI 修改）=========
+  var schedule = {
+    sleepStart: "22:00",
+    sleepEnd: "06:00",
+    hungryMorning: "06:30",
+    hungryNoon: "12:00",
+    napStart: "12:40",
+    napDuration: 20, // 分鐘
+    hungryEvening: "18:00",
   };
 
-  // 三種閒置熊，載入／回到閒置時隨機選一隻
+  // 今天是否已經講過某些提醒
+  var scheduleNoticeState = {
+    sleepyNight: null,
+    hungryMorning: null,
+    hungryNoon: null,
+    hungryEvening: null,
+    napSoon: null,
+  };
+
+  var isSleeping = false;
+
+  // ========= 熊熊名字（預設：熊麻吉）=========
+  var bearName = "熊麻吉";
+
+  // ========= 熊熊圖片 =========
   var idleImages = [
     "images/bear_idle1.png",
     "images/bear_idle2.png",
     "images/bear_idle3.png",
   ];
 
-  // 最近一次完成紀錄（給完成 Modal 用）
-  var lastSessionInfo = null;
+  var activityImages = {
+    reading: "images/bear_reading.png",
+    sport: "images/bear_sport.png",
+    skill: "images/bear_skill.png",
+  };
 
-  // ========== localStorage ==========
-  function loadState() {
-    try {
-      var saved = localStorage.getItem("bearGrowthState");
-      if (saved) Object.assign(state, JSON.parse(saved));
-    } catch (e) {
-      console.warn("載入成長資料失敗：", e);
-    }
+  var sleepImage = "images/bear_sleep.png"; // 請放一張睡覺熊的圖
 
-    try {
-      var d = localStorage.getItem("bearGrowthDiary");
-      if (d) diary = JSON.parse(d);
-    } catch (e) {
-      console.warn("載入日記失敗：", e);
-    }
-
-    try {
-      var a = localStorage.getItem("bearGrowthAlarms");
-      if (a) alarms = JSON.parse(a);
-    } catch (e) {
-      console.warn("載入鬧鐘失敗：", e);
-    }
-  }
-
-  function saveState() {
-    try {
-      localStorage.setItem("bearGrowthState", JSON.stringify(state));
-    } catch (e) {
-      console.warn("儲存成長資料失敗：", e);
-    }
-  }
-
-  function saveDiary() {
-    try {
-      localStorage.setItem("bearGrowthDiary", JSON.stringify(diary));
-    } catch (e) {
-      console.warn("儲存日記失敗：", e);
-    }
-  }
-
-  function saveAlarms() {
-    try {
-      localStorage.setItem("bearGrowthAlarms", JSON.stringify(alarms));
-    } catch (e) {
-      console.warn("儲存鬧鐘失敗：", e);
-    }
-  }
-
-  function calcLevel() {
-    var total = state.reading + state.sport + state.skill;
-    state.level = 1 + Math.floor(total / 60); // 每 60 分鐘升級
-  }
-
-  // ========== 熊熊小語 ==========
+  // ========= 小語 =========
   var messages = {
     idle: [
-      "🐻 我們今天要一起做什麼呢？",
+      "🐻 我是熊麻吉～今天想一起做什麼呢？",
       "🐻 我在這裡等你，一起選一件小事開始吧。",
-      "🐻 想看書、運動，還是學新技能呢？我都可以陪你。",
+      "🐻 想看書、運動，還是學新技能呢？熊麻吉都可以陪你。",
     ],
     reading: [
       "🐻 書裡的世界好好玩，再一起看一會兒吧。",
@@ -123,13 +94,108 @@
       "任務完成～今天的你又升級了。",
       "謝謝你願意照顧自己，也順便照顧了我。",
     ],
+    sleepySoon: [
+      "🐻 好睏唷，要不要一起準備睡覺？",
+      "🐻 今天也辛苦了，差不多可以洗洗睡囉～",
+      "🐻 休息也是很重要的，要好好照顧身體。",
+    ],
+    sleeping: [
+      "🐻💤 熊麻吉在睡覺補充能量，明天再一起冒險～",
+      "🐻💤 好好睡一覺，身體和心情都會變更有力氣。",
+      "🐻💤 謝謝你讓我休息，醒來再一起加油！",
+    ],
+    wakeUp: [
+      "🐻🌅 早安～熊麻吉睡得很好，今天也一起努力吧！",
+      "🐻 早安！新的冒險日開始了～",
+      "🐻 休息好了，今天要先做什麼呢？",
+    ],
+    hungry: [
+      "🐻 好餓喔～要不要先吃點東西？",
+      "🐻 肚子咕嚕咕嚕叫了，該補充點能量囉！",
+      "🐻 吃飽才有力氣繼續冒險～",
+    ],
+    napSoon: [
+      "🐻 中午了，可以來個小午睡，讓大腦也休息一下。",
+      "🐻 要不要睡個 20 分鐘，醒來會更有精神喔！",
+      "🐻 小小午睡也是照顧身體的一部分～",
+    ],
   };
 
   function randomFrom(arr) {
     return arr[Math.floor(Math.random() * arr.length)];
   }
 
-  // ========== UI：成長狀態 ==========
+  // ========= localStorage =========
+  function loadState() {
+    try {
+      var saved = localStorage.getItem("bearGrowthState");
+      if (saved) Object.assign(state, JSON.parse(saved));
+    } catch (e) {}
+
+    try {
+      var d = localStorage.getItem("bearGrowthDiary");
+      if (d) diary = JSON.parse(d);
+    } catch (e) {}
+
+    try {
+      var a = localStorage.getItem("bearGrowthAlarms");
+      if (a) alarms = JSON.parse(a);
+    } catch (e) {}
+
+    try {
+      var s = localStorage.getItem("bearGrowthSchedule");
+      if (s) Object.assign(schedule, JSON.parse(s));
+    } catch (e) {}
+  }
+
+  function saveState() {
+    try {
+      localStorage.setItem("bearGrowthState", JSON.stringify(state));
+    } catch (e) {}
+  }
+  function saveDiary() {
+    try {
+      localStorage.setItem("bearGrowthDiary", JSON.stringify(diary));
+    } catch (e) {}
+  }
+  function saveAlarms() {
+    try {
+      localStorage.setItem("bearGrowthAlarms", JSON.stringify(alarms));
+    } catch (e) {}
+  }
+  function saveSchedule() {
+    try {
+      localStorage.setItem("bearGrowthSchedule", JSON.stringify(schedule));
+    } catch (e) {}
+  }
+
+  // 讀取 / 儲存熊熊名字
+  function loadName() {
+    try {
+      var n = localStorage.getItem("bearGrowthName");
+      if (n && typeof n === "string") {
+        bearName = n;
+      }
+    } catch (e) {}
+  }
+
+  function saveName() {
+    try {
+      localStorage.setItem("bearGrowthName", bearName);
+    } catch (e) {}
+  }
+
+  function updateNameUI() {
+    var label = document.getElementById("bearNameLabel");
+    if (label) label.textContent = bearName;
+  }
+
+  // ========= 等級 =========
+  function calcLevel() {
+    var total = state.reading + state.sport + state.skill;
+    state.level = 1 + Math.floor(total / 60);
+  }
+
   function updateStatsUI() {
     calcLevel();
 
@@ -148,26 +214,33 @@
     sportValue.textContent = state.sport + " 分鐘";
     skillValue.textContent = state.skill + " 分鐘";
 
-    function calcPercent(mins) {
+    function percent(mins) {
       var p = (mins / 120) * 100;
       return p > 100 ? 100 : p;
     }
 
-    readingBar.style.width = calcPercent(state.reading) + "%";
-    sportBar.style.width = calcPercent(state.sport) + "%";
-    skillBar.style.width = calcPercent(state.skill) + "%";
+    readingBar.style.width = percent(state.reading) + "%";
+    sportBar.style.width = percent(state.sport) + "%";
+    skillBar.style.width = percent(state.skill) + "%";
   }
 
-  // ========== 熊熊圖片＋表情 ==========
+  // ========= 熊熊狀態 =========
   function setBearImage(mode) {
     var img = document.getElementById("bearImage");
     if (!img) return;
 
-    if (mode === "idle") {
-      img.src = randomFrom(idleImages);
-    } else {
-      img.src = activityImages[mode] || randomFrom(idleImages);
+    if (mode === "sleep") {
+      img.src = sleepImage;
+      return;
     }
+
+    if (mode === "reading" || mode === "sport" || mode === "skill") {
+      img.src = activityImages[mode] || randomFrom(idleImages);
+      return;
+    }
+
+    // idle
+    img.src = randomFrom(idleImages);
   }
 
   function setBearMode(mode, forceMessage) {
@@ -202,16 +275,15 @@
     setBearImage(mode);
 
     if (forceMessage || !bearBubble.textContent) {
-      var group = msgGroup || messages.idle;
       if (mode === "idle") {
         bearBubble.textContent = messages.idle[0];
       } else {
-        bearBubble.textContent = randomFrom(group);
+        bearBubble.textContent = randomFrom(msgGroup || messages.idle);
       }
     }
   }
 
-  // ========== 定時器顯示 ==========
+  // ========= 定時器顯示 =========
   function updateTimerDisplay(totalSeconds, remaining) {
     var display = document.getElementById("timerDisplay");
     var progressFill = document.getElementById("timerProgressFill");
@@ -240,14 +312,14 @@
     updateTimerDisplay(0, 0);
   }
 
-  // ========== 累加時間 UI ==========
+  // ========= 累加時間 UI =========
   function updateDurationUI() {
     var el = document.getElementById("durationMinutes");
     if (!el) return;
     el.textContent = currentMinutes + " 分鐘";
   }
 
-  // ========== 日記 ==========
+  // ========= 日記 =========
   function formatDateTime(iso) {
     var d = new Date(iso);
     if (isNaN(d.getTime())) return iso;
@@ -295,7 +367,9 @@
     list.innerHTML = html;
   }
 
-  // ========== 完成任務：加成長＋寫日記＋顯示 Modal ==========
+  // ========= 完成一輪 =========
+  var lastSessionInfo = null;
+
   function finishSession() {
     if (!currentMinutes || !currentActivity) return;
 
@@ -327,7 +401,7 @@
     showCompletionModal(record);
   }
 
-  // ========== 每 10 分鐘一次鼓勵小語 ==========
+  // 每 10 分鐘鼓勵一次
   function maybeEncourage(totalSeconds, remainingSecondsNow) {
     var elapsed = totalSeconds - remainingSecondsNow;
     if (elapsed <= 0) return;
@@ -350,12 +424,17 @@
     bearBubble.textContent = randomFrom(group);
   }
 
-  // ========== 啟動一輪定時 ==========
+  // ========= 啟動定時器 =========
   function startTimerSession() {
     var startButton = document.getElementById("startButton");
     var cancelButton = document.getElementById("cancelButton");
     if (!startButton || !cancelButton) return;
     if (timerId) return;
+
+    if (isSleeping) {
+      alert("熊麻吉現在在睡覺時間，明早起床後再一起努力吧！");
+      return;
+    }
 
     if (!currentMinutes || currentMinutes <= 0) {
       alert("請先設定專注時間，可以用 + / - 來調整喔！");
@@ -394,7 +473,7 @@
     }, 1000);
   }
 
-  // ========== 完成鼓勵 Modal ==========
+  // ========= 完成鼓勵 Modal =========
   function showCompletionModal(record) {
     var modal = document.getElementById("completionModal");
     var titleEl = document.getElementById("completionTitle");
@@ -428,7 +507,7 @@
     }, 200);
   }
 
-  // ========== 鬧鐘 ==========
+  // ========= 鬧鐘 =========
   function formatHHMM(date) {
     var hh = ("0" + date.getHours()).slice(-2);
     var mm = ("0" + date.getMinutes()).slice(-2);
@@ -545,7 +624,7 @@
 
       var label = activityLabels[a.activity] || a.activity;
       var msg =
-        "⏰ 成長熊提醒你：\n現在是「" +
+        "⏰ 熊麻吉提醒你：\n現在是「" +
         hhmm +
         "」，是約定好的「" +
         label +
@@ -566,7 +645,204 @@
     });
   }
 
-  // ========== 綁定事件 ==========
+  // ========= 作息：時間工具 =========
+  function hhmmToMinute(hhmm) {
+    var parts = hhmm.split(":");
+    var h = parseInt(parts[0], 10) || 0;
+    var m = parseInt(parts[1], 10) || 0;
+    return h * 60 + m;
+  }
+
+  function minuteToHHMM(min) {
+    var h = Math.floor(min / 60) % 24;
+    var m = min % 60;
+    var hh = ("0" + h).slice(-2);
+    var mm = ("0" + m).slice(-2);
+    return hh + ":" + mm;
+  }
+
+  // 是否在某段時間內（支援跨午夜）
+  function isInRange(nowMin, startMin, endMin) {
+    if (startMin <= endMin) {
+      return nowMin >= startMin && nowMin < endMin;
+    } else {
+      // 例如 22:00 ~ 06:00
+      return nowMin >= startMin || nowMin < endMin;
+    }
+  }
+
+  // ========= 夜間睡眠狀態 =========
+  function enterSleepMode() {
+    if (isSleeping) return;
+    isSleeping = true;
+
+    var startButton = document.getElementById("startButton");
+    var cancelButton = document.getElementById("cancelButton");
+    if (timerId) {
+      clearInterval(timerId);
+      timerId = null;
+      if (startButton) startButton.disabled = false;
+      if (cancelButton) cancelButton.disabled = true;
+      resetTimerUI();
+    }
+
+    if (startButton) startButton.disabled = true;
+
+    var activityButtons = document.querySelectorAll(".activity-btn");
+    activityButtons.forEach(function (btn) {
+      btn.disabled = true;
+    });
+
+    var bearBubble = document.getElementById("bearBubble");
+    setBearImage("sleep");
+    if (bearBubble) {
+      bearBubble.textContent = randomFrom(messages.sleeping);
+    }
+  }
+
+  function exitSleepMode() {
+    if (!isSleeping) return;
+    isSleeping = false;
+
+    var startButton = document.getElementById("startButton");
+    if (startButton) startButton.disabled = false;
+
+    var activityButtons = document.querySelectorAll(".activity-btn");
+    activityButtons.forEach(function (btn) {
+      btn.disabled = false;
+    });
+
+    setBearMode("idle", false);
+    var bearBubble = document.getElementById("bearBubble");
+    if (bearBubble) {
+      bearBubble.textContent = randomFrom(messages.wakeUp);
+    }
+  }
+
+  function checkSleepState() {
+    var now = new Date();
+    var nowMin = now.getHours() * 60 + now.getMinutes();
+    var sleepStartMin = hhmmToMinute(schedule.sleepStart);
+    var sleepEndMin = hhmmToMinute(schedule.sleepEnd);
+
+    var shouldSleep = isInRange(nowMin, sleepStartMin, sleepEndMin);
+    if (shouldSleep) {
+      enterSleepMode();
+    } else {
+      exitSleepMode();
+    }
+  }
+
+  // ========= 作息提醒（睡覺將近 / 肚子餓 / 午睡） =========
+  function todayStr() {
+    return new Date().toISOString().slice(0, 10);
+  }
+
+  function checkScheduleNotice() {
+    var now = new Date();
+    var nowMin = now.getHours() * 60 + now.getMinutes();
+    var today = todayStr();
+
+    var bearBubble = document.getElementById("bearBubble");
+    if (!bearBubble) return;
+
+    // 1. 接近晚上睡覺（前 30 分鐘，只提示一次）
+    var sleepStartMin = hhmmToMinute(schedule.sleepStart);
+    var diffToSleep = (sleepStartMin - nowMin + 1440) % 1440;
+
+    if (
+      diffToSleep > 0 &&
+      diffToSleep <= 30 &&
+      scheduleNoticeState.sleepyNight !== today
+    ) {
+      bearBubble.textContent = randomFrom(messages.sleepySoon);
+      scheduleNoticeState.sleepyNight = today;
+    }
+
+    // 2. 午睡前 10 分鐘提醒
+    var napStartMin = hhmmToMinute(schedule.napStart);
+    var diffToNap = napStartMin - nowMin;
+    if (
+      diffToNap > 0 &&
+      diffToNap <= 10 &&
+      scheduleNoticeState.napSoon !== today
+    ) {
+      bearBubble.textContent = randomFrom(messages.napSoon);
+      scheduleNoticeState.napSoon = today;
+    }
+
+    // 3. 肚子餓時間（剛好該分鐘才提示一次）
+    var hhmmNow = formatHHMM(now);
+
+    if (
+      hhmmNow === schedule.hungryMorning &&
+      scheduleNoticeState.hungryMorning !== today
+    ) {
+      bearBubble.textContent = randomFrom(messages.hungry);
+      scheduleNoticeState.hungryMorning = today;
+    }
+
+    if (
+      hhmmNow === schedule.hungryNoon &&
+      scheduleNoticeState.hungryNoon !== today
+    ) {
+      bearBubble.textContent = randomFrom(messages.hungry);
+      scheduleNoticeState.hungryNoon = today;
+    }
+
+    if (
+      hhmmNow === schedule.hungryEvening &&
+      scheduleNoticeState.hungryEvening !== today
+    ) {
+      bearBubble.textContent = randomFrom(messages.hungry);
+      scheduleNoticeState.hungryEvening = today;
+    }
+  }
+
+  // ========= 作息設定 UI 填入 & 儲存 =========
+  function fillScheduleForm() {
+    var sleepStartInput = document.getElementById("sleepStartInput");
+    var sleepEndInput = document.getElementById("sleepEndInput");
+    var hungryMorningInput = document.getElementById("hungryMorningInput");
+    var hungryNoonInput = document.getElementById("hungryNoonInput");
+    var napStartInput = document.getElementById("napStartInput");
+    var napDurationInput = document.getElementById("napDurationInput");
+    var hungryEveningInput = document.getElementById("hungryEveningInput");
+
+    if (!sleepStartInput) return;
+
+    sleepStartInput.value = schedule.sleepStart;
+    sleepEndInput.value = schedule.sleepEnd;
+    hungryMorningInput.value = schedule.hungryMorning;
+    hungryNoonInput.value = schedule.hungryNoon;
+    napStartInput.value = schedule.napStart;
+    napDurationInput.value = schedule.napDuration;
+    hungryEveningInput.value = schedule.hungryEvening;
+  }
+
+  function saveScheduleFromForm() {
+    var sleepStartInput = document.getElementById("sleepStartInput");
+    var sleepEndInput = document.getElementById("sleepEndInput");
+    var hungryMorningInput = document.getElementById("hungryMorningInput");
+    var hungryNoonInput = document.getElementById("hungryNoonInput");
+    var napStartInput = document.getElementById("napStartInput");
+    var napDurationInput = document.getElementById("napDurationInput");
+    var hungryEveningInput = document.getElementById("hungryEveningInput");
+
+    if (!sleepStartInput) return;
+
+    schedule.sleepStart = sleepStartInput.value || "22:00";
+    schedule.sleepEnd = sleepEndInput.value || "06:00";
+    schedule.hungryMorning = hungryMorningInput.value || "06:30";
+    schedule.hungryNoon = hungryNoonInput.value || "12:00";
+    schedule.napStart = napStartInput.value || "12:40";
+    schedule.napDuration = parseInt(napDurationInput.value, 10) || 20;
+    schedule.hungryEvening = hungryEveningInput.value || "18:00";
+
+    saveSchedule();
+  }
+
+  // ========= 事件綁定 =========
   function setupEvents() {
     var activityButtons = Array.prototype.slice.call(
       document.querySelectorAll(".activity-btn")
@@ -596,9 +872,22 @@
     var alarmTime = document.getElementById("alarmTime");
     var alarmLabel = document.getElementById("alarmLabel");
 
+    var openScheduleBtn = document.getElementById("openScheduleBtn");
+    var scheduleModal = document.getElementById("scheduleModal");
+    var closeScheduleBtn = document.getElementById("closeScheduleBtn");
+    var saveScheduleBtn = document.getElementById("saveScheduleBtn");
+
+    var editNameBtn = document.getElementById("editNameBtn");
+    var nameModal = document.getElementById("nameModal");
+    var closeNameBtn = document.getElementById("closeNameBtn");
+    var saveNameBtn = document.getElementById("saveNameBtn");
+    var bearNameInput = document.getElementById("bearNameInput");
+    var nameModalTitle = document.getElementById("nameModalTitle");
+
     // 活動切換
     activityButtons.forEach(function (btn) {
       btn.addEventListener("click", function () {
+        if (isSleeping) return;
         activityButtons.forEach(function (b) {
           b.classList.remove("active");
         });
@@ -628,7 +917,6 @@
         updateDurationUI();
       });
     }
-
     if (minusBtn) {
       minusBtn.addEventListener("click", function () {
         currentMinutes -= currentStep;
@@ -683,7 +971,6 @@
       });
     }
 
-    // 點背景關閉日記 Modal
     if (allDiaryModal) {
       allDiaryModal.addEventListener("click", function (e) {
         if (e.target === allDiaryModal.querySelector(".modal-backdrop")) {
@@ -695,23 +982,19 @@
       });
     }
 
-    // 完成 Modal：「再來一輪」
+    // 完成 Modal
     if (modalAgainBtn) {
       modalAgainBtn.addEventListener("click", function () {
         hideCompletionModal();
         startTimerSession();
       });
     }
-
-    // 完成 Modal：「先休息一下」
     if (modalRestBtn) {
       modalRestBtn.addEventListener("click", function () {
         hideCompletionModal();
         setBearMode("idle", true);
       });
     }
-
-    // 點擊完成 Modal 背景也關閉
     if (completionModal) {
       completionModal.addEventListener("click", function (e) {
         if (e.target === completionModal.querySelector(".modal-backdrop")) {
@@ -720,7 +1003,7 @@
       });
     }
 
-    // 打開鬧鐘 Modal
+    // 鬧鐘 Modal 開關
     if (openAlarmModalBtn && alarmModal) {
       openAlarmModalBtn.addEventListener("click", function () {
         updateAlarmsUI();
@@ -730,8 +1013,6 @@
         }, 10);
       });
     }
-
-    // 關閉鬧鐘 Modal
     if (closeAlarmModalBtn && alarmModal) {
       closeAlarmModalBtn.addEventListener("click", function () {
         alarmModal.classList.remove("show");
@@ -740,7 +1021,6 @@
         }, 200);
       });
     }
-
     if (alarmModal) {
       alarmModal.addEventListener("click", function (e) {
         if (e.target === alarmModal.querySelector(".modal-backdrop")) {
@@ -767,19 +1047,151 @@
         alarmLabel.value = "";
       });
     }
+
+    // 作息設定 Modal
+    if (openScheduleBtn && scheduleModal) {
+      openScheduleBtn.addEventListener("click", function () {
+        fillScheduleForm();
+        scheduleModal.classList.remove("hidden");
+        setTimeout(function () {
+          scheduleModal.classList.add("show");
+        }, 10);
+      });
+    }
+    if (closeScheduleBtn && scheduleModal) {
+      closeScheduleBtn.addEventListener("click", function () {
+        scheduleModal.classList.remove("show");
+        setTimeout(function () {
+          scheduleModal.classList.add("hidden");
+        }, 200);
+      });
+    }
+    if (scheduleModal) {
+      scheduleModal.addEventListener("click", function (e) {
+        if (e.target === scheduleModal.querySelector(".modal-backdrop")) {
+          scheduleModal.classList.remove("show");
+          setTimeout(function () {
+            scheduleModal.classList.add("hidden");
+          }, 200);
+        }
+      });
+    }
+
+    if (saveScheduleBtn) {
+      saveScheduleBtn.addEventListener("click", function () {
+        saveScheduleFromForm();
+        alert("作息設定已儲存，熊麻吉會依照新的作息提醒你唷！");
+        if (scheduleModal) {
+          scheduleModal.classList.remove("show");
+          setTimeout(function () {
+            scheduleModal.classList.add("hidden");
+          }, 200);
+        }
+      });
+    }
+
+    // 熊熊名字：打開／關閉／儲存
+    function openNameModal(isFirstTime) {
+      if (!nameModal) return;
+      nameModalTitle.textContent = isFirstTime
+        ? "幫熊麻吉取名字"
+        : "修改熊熊的名字";
+      if (bearNameInput) {
+        bearNameInput.value = bearName || "熊麻吉";
+        bearNameInput.focus();
+      }
+      nameModal.classList.remove("hidden");
+      setTimeout(function () {
+        nameModal.classList.add("show");
+      }, 10);
+    }
+
+    function closeNameModal() {
+      if (!nameModal) return;
+      nameModal.classList.remove("show");
+      setTimeout(function () {
+        nameModal.classList.add("hidden");
+      }, 200);
+    }
+
+    if (editNameBtn) {
+      editNameBtn.addEventListener("click", function () {
+        openNameModal(false);
+      });
+    }
+
+    if (closeNameBtn) {
+      closeNameBtn.addEventListener("click", function () {
+        closeNameModal();
+      });
+    }
+
+    if (nameModal) {
+      nameModal.addEventListener("click", function (e) {
+        if (e.target === nameModal.querySelector(".modal-backdrop")) {
+          closeNameModal();
+        }
+      });
+    }
+
+    if (saveNameBtn) {
+      saveNameBtn.addEventListener("click", function () {
+        if (!bearNameInput) return;
+        var v = bearNameInput.value.trim();
+        if (!v) v = "熊麻吉";
+        bearName = v;
+        saveName();
+        updateNameUI();
+        closeNameModal();
+      });
+    }
   }
 
-  // ========== 初始化 ==========
+  // ========= 初始化 =========
   document.addEventListener("DOMContentLoaded", function () {
     loadState();
+    loadName();
     updateStatsUI();
     resetTimerUI();
     updateDurationUI();
     setBearMode("idle", true);
     updateAlarmsUI();
+    updateNameUI();
+
     setupEvents();
 
-    // 每 30 秒檢查鬧鐘
-    setInterval(checkAlarmsTick, 30000);
+    // 第一次沒有名字時，自動跳出取名視窗
+    var hasName = false;
+    try {
+      hasName = !!localStorage.getItem("bearGrowthName");
+    } catch (e) {}
+
+    if (!hasName) {
+      setTimeout(function () {
+        var nameModal = document.getElementById("nameModal");
+        var nameModalTitle = document.getElementById("nameModalTitle");
+        var bearNameInput = document.getElementById("bearNameInput");
+        if (nameModal && nameModalTitle && bearNameInput) {
+          nameModalTitle.textContent = "幫熊麻吉取名字";
+          bearNameInput.value = bearName;
+          nameModal.classList.remove("hidden");
+          setTimeout(function () {
+            nameModal.classList.add("show");
+            bearNameInput.focus();
+          }, 10);
+        }
+      }, 500);
+    }
+
+    // 立刻檢查一次睡眠狀態 / 作息提醒
+    checkSleepState();
+    checkScheduleNotice();
+
+    // 每 30 秒檢查鬧鐘 + 作息提醒 + 睡眠狀態
+    setInterval(function () {
+      checkAlarmsTick();
+      checkScheduleNotice();
+      checkSleepState();
+    }, 30000);
   });
 })();
