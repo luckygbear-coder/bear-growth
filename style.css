@@ -94,7 +94,7 @@ section {
   cursor: pointer;
 }
 
-/* 熊熊視覺區：固定大小，不讓圖片蓋滿畫面 */
+/* 熊熊視覺區：固定大小 */
 .bear-visual {
   width: 170px;
   height: 170px;
@@ -166,6 +166,39 @@ section {
   border-color: transparent transparent #fffaf0 transparent;
 }
 
+/* 熊熊名字列 */
+.bear-name-row {
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #7a4a5b;
+}
+
+.bear-name-label {
+  white-space: nowrap;
+}
+
+.bear-name-value {
+  font-weight: 600;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bear-name-edit-btn {
+  margin-left: auto;
+  border-radius: 999px;
+  border: 1px solid #f1c3a7;
+  padding: 2px 8px;
+  font-size: 10px;
+  background: #fffaf0;
+  color: #91436b;
+  cursor: pointer;
+}
+
 /* 📊 成長狀態 */
 .stats-header {
   display: flex;
@@ -182,30 +215,6 @@ section {
 
 /* 成長日記按鈕 */
 .stats-diary-btn {
-  border-radius: 999px;
-  border: 1px solid #f1c3a7;
-  padding: 3px 8px;
-  font-size: 11px;
-  background: #fffaf0;
-  color: #91436b;
-  cursor: pointer;
-}
-
-.timer h2 {
-  margin: 0;
-  font-size: 14px;
-  color: #85415b;
-}
-
-/* 今天要做什麼標題＋鬧鐘小鈕 */
-.timer-header-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 4px;
-}
-
-.timer-alarm-btn {
   border-radius: 999px;
   border: 1px solid #f1c3a7;
   padding: 3px 8px;
@@ -260,6 +269,37 @@ section {
 }
 
 /* ⏳ 任務與定時器 */
+
+.timer h2 {
+  margin: 0;
+  font-size: 14px;
+  color: #85415b;
+}
+
+/* 今天要做什麼標題右邊的兩顆小按鈕 */
+.timer-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.timer-header-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.timer-alarm-btn,
+.timer-schedule-btn {
+  border-radius: 999px;
+  border: 1px solid #f1c3a7;
+  padding: 3px 8px;
+  font-size: 11px;
+  background: #fffaf0;
+  color: #91436b;
+  cursor: pointer;
+}
+
 .timer h3 {
   margin: 6px 0 4px;
   font-size: 12px;
@@ -635,6 +675,49 @@ section {
 .diary-sub {
   color: #9a6b7a;
   margin-top: 1px;
+}
+
+/* 作息設定 Modal 卡片 */
+.settings-card {
+  font-size: 12px;
+}
+
+.settings-tip {
+  font-size: 11px;
+  color: #9a6b7a;
+  margin: 0 0 6px;
+}
+
+.schedule-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.schedule-row label {
+  width: 90px;
+  font-size: 11px;
+  color: #7a4a5b;
+}
+
+.schedule-row input[type="time"],
+.schedule-row input[type="number"] {
+  flex: 1;
+  border-radius: 999px;
+  border: 1px solid #f1c3a7;
+  padding: 3px 8px;
+  font-size: 11px;
+  background: #fffdf6;
+}
+
+/* 取名字 Modal 卡片 */
+.name-card {
+  font-size: 12px;
+}
+
+.name-card .schedule-row label {
+  width: 70px;
 }
 
 /* 隱藏用 */
