@@ -1,18 +1,27 @@
-"icons": [
-  {
-    "src": "icons/bear-icon-192.png",
-    "sizes": "192x192",
-    "type": "image/png"
-  },
-  {
-    "src": "icons/bear-icon-512.png",
-    "sizes": "512x512",
-    "type": "image/png"
-  },
-  {
-    "src": "icons/bear-icon-maskable-512.png",
-    "sizes": "512x512",
-    "type": "image/png",
-    "purpose": "any maskable"
-  }
-]
+{
+  "name": "熊麻吉：陪你一起成長",
+  "short_name": "熊麻吉",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#FFE5C9",
+  "theme_color": "#FFE5C9",
+  "icons": [
+    {
+      "src": "icons/bear-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/bear-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/bear-icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
